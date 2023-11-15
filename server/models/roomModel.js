@@ -16,6 +16,11 @@ const roomSchema = mongoose.Schema({
 		required: true,
 	},
 
+	players: {
+		type: Array,
+		required: true,
+	},
+
 	owner: {
 		type: String,
 		required: true,
