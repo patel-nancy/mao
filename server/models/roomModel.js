@@ -11,11 +11,6 @@ const roomSchema = mongoose.Schema({
 		type: String,
 	},
 
-	curr_num_players: {
-		type: Number,
-		required: true,
-	},
-
 	players: {
 		type: Array,
 		required: true,

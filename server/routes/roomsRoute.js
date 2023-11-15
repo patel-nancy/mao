@@ -19,7 +19,6 @@ router.post("/", async (req, res) => {
 				room_name: req.body.room_name,
 				owner: req.body.owner,
 				room_password: req.body.room_password,
-				curr_num_players: 1,
 				players: [req.body.owner],
 			};
 		} else {
@@ -27,7 +26,6 @@ router.post("/", async (req, res) => {
 			newRoom = {
 				room_name: req.body.room_name,
 				owner: req.body.owner,
-				curr_num_players: 1,
 				players: [req.body.owner],
 			};
 		}
@@ -56,8 +54,8 @@ router.delete("/:roomid", async (req, res) => {
 	}
 });
 
-//updating the number of players in room, IF there's space
-router.put("/:roomid", async (req, res) => {
+//adding player to room, IF there's space
+router.put("/adduser/:roomid", async (req, res) => {
 	try {
 		if (!req.body.newplayer) {
 			return res.status(400).send({ message: "Missing new player name" });
@@ -67,6 +65,7 @@ router.put("/:roomid", async (req, res) => {
 		if (!room) {
 			return res.status(404).json({ message: "Room not found." });
 		}
+		//TODO: put player in new room
 		if (room.players.length < maxPlayers) {
 			room.players.push(req.body.newplayer);
 			await room.save();
@@ -80,6 +79,37 @@ router.put("/:roomid", async (req, res) => {
 	} catch (err) {
 		console.log(err.message);
 		res.status(500).send({ message: err.message });
+	}
+});
+
+//deleting player from a room
+router.put("/deleteuser/:roomid", async (req, res) => {
+	try {
+		if (!req.body.playertodelete) {
+			return res
+				.status(400)
+				.send({ message: "Missing player to be deleted" });
+		}
+		const { roomid } = req.params;
+		const room = await Room.findById(roomid);
+		if (!room) {
+			return res.status(404).json({ message: "Room not found." });
+		}
+		for (let i = 0; i < room.players.length; i++) {
+			if (req.body.playertodelete === room.players[i]) {
+				room.players.splice(i, 1); //remove the player at that index
+				await room.save();
+				return res
+					.status(200)
+					.send({ message: "Successful: player removed from room." });
+			}
+		}
+		return res
+			.status(404)
+			.json({ message: "Could not find player in room's player list." });
+	} catch (err) {
+		console.log(err.message);
+		return res.status(500).send({ message: err.message });
 	}
 });
 
