@@ -7,14 +7,7 @@ import cors from "cors";
 
 const app = express();
 app.use(express.json()); //for all post reqs, we need this line to parse the req body
-app.use(
-	cors({
-		//allow custom origins
-		origin: "http://localhost:3000", //client-side
-		methods: ["GET", "POST", "PUT", "DELETE"],
-		allowedHeaders: ["Content-Type"],
-	})
-);
+app.use(cors());
 
 //starting server/client
 app.get("/", (req, res) => {

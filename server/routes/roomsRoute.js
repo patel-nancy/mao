@@ -4,6 +4,17 @@ import { Room } from "../models/roomModel.js";
 const router = express.Router();
 const maxPlayers = 5;
 
+//gets ALL rooms
+router.get("/", async (req, res) => {
+	try {
+		const rooms = await Room.find({});
+		return res.status(200).json({ count: rooms.length, data: rooms });
+	} catch (err) {
+		console.log(err.message);
+		return res.status(500).send({ message: err.message });
+	}
+});
+
 //creating new room
 router.post("/", async (req, res) => {
 	try {

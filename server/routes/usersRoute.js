@@ -33,7 +33,7 @@ router.post("/", async (req, res) => {
 router.get("/", async (req, res) => {
 	try {
 		const users = await User.find({});
-		return res.status(200).json(users);
+		return res.status(200).json({ count: users.length, data: users });
 	} catch (err) {
 		console.log(err.message);
 		res.status(500).send({ message: err.message });
