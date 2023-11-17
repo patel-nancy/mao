@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Home from "./pages/home";
 import CreateUser from "./pages/createUser";
 import CreateRoom from "./pages/createRoom";
-import EditRoom from "./pages/editRoom";
+import EnterRoom from "./pages/enterRoom";
 import DeleteRoom from "./pages/deleteRoom";
 
 const App = () => {
@@ -12,7 +12,7 @@ const App = () => {
 			<Route path="/" element={<Home />} />
 			<Route path="/users/create" element={<CreateUser />} />
 			<Route path="/rooms/create" element={<CreateRoom />} />
-			<Route path="/rooms/edit/:id" element={<EditRoom />} />
+			<Route path="/rooms/enter/:id" element={<EnterRoom />} />
 			<Route path="/rooms/delete/:id" element={<DeleteRoom />} />
 		</Routes>
 	);

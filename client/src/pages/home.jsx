@@ -26,12 +26,13 @@ const Home = () => {
 			});
 	}, []);
 
+	//note: Links are from App.jsx Routes
 	return (
 		//the div className is a TailwindCSS feature. copied from a tutorial.
 		<div className="p-4">
 			<div className="flex justify-between items-center">
 				<h1 className="text-3xl my-8">Rooms List</h1>
-				<Link to={`/rooms/`}>
+				<Link to={`/rooms/create`}>
 					<MdOutlineAddBox className="text-sky-800 text-4xl" />
 				</Link>
 			</div>
@@ -63,7 +64,6 @@ const Home = () => {
 								<td className="border border-slate-700 rounded-md text-center">
 									{index + 1}
 								</td>
-								{/*list the Room #*/}
 								<td className="border border-slate-700 rounded-md text-center">
 									{room.room_name}
 								</td>
@@ -72,6 +72,9 @@ const Home = () => {
 								</td>
 								<td className="border border-slate-700 rounded-md text-center">
 									<div className="flex justify-center gap-x-4">
+										<Link to={`/rooms/enter/${room._id}`}>
+											<BsInfoCircle className="text-2xl text-green-800" />
+										</Link>
 										{/* TODO: only let the user who is the owner delete */}
 										<Link to={`/rooms/edit/${room._id}`}>
 											<AiOutlineEdit className="text-2xl text-yellow-600" />
