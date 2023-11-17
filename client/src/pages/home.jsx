@@ -15,7 +15,7 @@ const Home = () => {
 
 		//http request to server
 		axios
-			.get("http://localhost:5000/rooms")
+			.get("http://localhost:5000/rooms/")
 			.then((res) => {
 				setRooms(res.data.data); //updates to list all rooms
 				setLoading(false); //no longer loading
@@ -31,7 +31,7 @@ const Home = () => {
 		<div className="p-4">
 			<div className="flex justify-between items-center">
 				<h1 className="text-3xl my-8">Rooms List</h1>
-				<Link>
+				<Link to={`/rooms/`}>
 					<MdOutlineAddBox className="text-sky-800 text-4xl" />
 				</Link>
 			</div>
@@ -50,7 +50,7 @@ const Home = () => {
 							</th>
 							<th className="border border-slate-600 rounded-md max-md:hidden">
 								Owner
-							</th>{" "}
+							</th>
 							{/* column hidden on mobile devices */}
 							<th className="border border-slate-600 rounded-md">
 								Operations
@@ -58,11 +58,11 @@ const Home = () => {
 						</tr>
 					</thead>
 					<tbody>
-						{rooms.map((room, index) => {
+						{rooms.map((room, index) => (
 							<tr key={room._id} className="h-8">
 								<td className="border border-slate-700 rounded-md text-center">
 									{index + 1}
-								</td>{" "}
+								</td>
 								{/*list the Room #*/}
 								<td className="border border-slate-700 rounded-md text-center">
 									{room.room_name}
@@ -72,18 +72,18 @@ const Home = () => {
 								</td>
 								<td className="border border-slate-700 rounded-md text-center">
 									<div className="flex justify-center gap-x-4">
-										<Link to={`/rooms/edit/${book._id}`}>
+										{/* TODO: only let the user who is the owner delete */}
+										<Link to={`/rooms/edit/${room._id}`}>
 											<AiOutlineEdit className="text-2xl text-yellow-600" />
 										</Link>
 
-										{/* TODO: only let the user who is the owner delete */}
-										<Link to={`/rooms/delete/${book._id}`}>
-											<MdOutlineDelete className="text-2xl text-yellow-600" />
+										<Link to={`/rooms/delete/${room._id}`}>
+											<MdOutlineDelete className="text-2xl text-red-600" />
 										</Link>
 									</div>
 								</td>
-							</tr>;
-						})}
+							</tr>
+						))}
 					</tbody>
 				</table>
 			)}
