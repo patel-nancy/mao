@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Spinner from "../components/Spinner";
+import { useAuth } from "../AuthContext";
 import { Link } from "react-router-dom";
 import { AiOutlineEdit } from "react-icons/ai";
 import { BsInfoCircle } from "react-icons/bs";
 import { MdOutlineAddBox, MdOutlineDelete } from "react-icons/md";
 
 const Home = () => {
+	const { user } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [rooms, setRooms] = useState([]); //to update rooms
 
@@ -30,6 +32,7 @@ const Home = () => {
 	return (
 		//the div className is a TailwindCSS feature. copied from a tutorial.
 		<div className="p-4">
+			<h1>Welcome, {user ? user : "Guest"}!</h1>
 			<div className="flex justify-between items-center">
 				<h1 className="text-3xl my-8">Rooms List</h1>
 				<Link to={`/rooms/create`}>
