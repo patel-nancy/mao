@@ -1,5 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import Landing from "./pages/landing";
 import Home from "./pages/home";
 import CreateUser from "./pages/createUser";
 import CreateRoom from "./pages/createRoom";
@@ -9,7 +10,8 @@ import DeleteRoom from "./pages/deleteRoom";
 const App = () => {
 	return (
 		<Routes>
-			<Route path="/" element={<Home />} />
+			<Route path="/" element={<Landing />} />
+			<Route path="/home" element={<Home />} />
 			<Route path="/users/create" element={<CreateUser />} />
 			<Route path="/rooms/create" element={<CreateRoom />} />
 			<Route path="/rooms/enter/:id" element={<EnterRoom />} />
