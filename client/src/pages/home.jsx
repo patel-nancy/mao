@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Spinner from "../components/Spinner";
+import Logout from "../components/Logout";
 import { useAuth } from "../AuthContext";
 import { Link } from "react-router-dom";
 import { AiOutlineEdit } from "react-icons/ai";
@@ -93,6 +94,9 @@ const Home = () => {
 					</tbody>
 				</table>
 			)}
+			<div>
+				<Logout />
+			</div>
 		</div>
 	);
 };
