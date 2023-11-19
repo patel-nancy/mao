@@ -32,13 +32,11 @@ router.post("/login", async (req, res) => {
 		if (!isValidPassword) {
 			return res.json({ message: "Invalid password." });
 		}
-		return res
-			.status(200)
-			.json({
-				success: true,
-				username: req.body.username,
-				message: "Login Successful",
-			});
+		return res.status(200).json({
+			success: true,
+			username: req.body.username,
+			message: "Login Successful",
+		});
 	} catch (err) {
 		console.log(err.message);
 		res.status(500).json({ message: err.message });
@@ -113,6 +111,7 @@ router.get("/:room", async (req, res) => {
 	}
 });
 
+//TODO: may not need this...delete?
 //update user's curr_room
 router.put("/curr_room/:userid", async (req, res) => {
 	try {
