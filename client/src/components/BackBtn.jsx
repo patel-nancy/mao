@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { BsArrowLeft } from "react-icons/bs";
 
 //default is Home
-const BackBtn = ({ destination = "/" }) => {
+const BackBtn = ({ destination = "/home" }) => {
 	return (
 		<div className="flex">
 			{/* TODO: the classNames are all copied from the tutorial */}

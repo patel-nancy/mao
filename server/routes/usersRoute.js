@@ -11,7 +11,7 @@ const saltRounds = 10;
 router.post("/login", async (req, res) => {
 	try {
 		if (!req.body.username || !req.body.password) {
-			return res.status(400).json({
+			return res.json({
 				success: false,
 				message: "Missing info: username or password",
 			});
@@ -19,9 +19,7 @@ router.post("/login", async (req, res) => {
 
 		const user = await User.findOne({ username: req.body.username });
 		if (!user) {
-			return res
-				.status(404)
-				.json({ success: false, message: "User not found" });
+			return res.json({ success: false, message: "User not found" });
 		}
 
 		const isValidPassword = await bcrypt.compare(
@@ -30,7 +28,7 @@ router.post("/login", async (req, res) => {
 		);
 
 		if (!isValidPassword) {
-			return res.json({ message: "Invalid password." });
+			return res.json({ success: false, message: "Invalid password." });
 		}
 		return res.status(200).json({
 			success: true,
@@ -39,16 +37,16 @@ router.post("/login", async (req, res) => {
 		});
 	} catch (err) {
 		console.log(err.message);
-		res.status(500).json({ message: err.message });
+		res.json({ success: false, message: err.message });
 	}
 });
 
 //creating new user
-router.post("/", async (req, res) => {
+router.post("/register", async (req, res) => {
 	try {
 		//required fields NOT filled in
 		if (!req.body.username || !req.body.password) {
-			return res.status(400).json({
+			return res.json({
 				success: false,
 				message: "Missing info: username or password",
 			});
@@ -59,7 +57,7 @@ router.post("/", async (req, res) => {
 			username: req.body.username,
 		});
 		if (isExistingUser) {
-			return res.status(400).json({
+			return res.json({
 				success: false,
 				message: "This username already exists",
 			});
@@ -79,7 +77,11 @@ router.post("/", async (req, res) => {
 		};
 
 		const user = await User.create(newUser); //userModel.js
-		return res.status(201).send(user);
+		return res.status(201).json({
+			success: true,
+			username: user.username,
+			message: "Register Successful",
+		});
 	} catch (err) {
 		console.log(err.message);
 		res.status(500).send({ message: err.message });
