@@ -3,12 +3,13 @@ import axios from "axios";
 import Spinner from "../components/Spinner";
 import Logout from "../components/Logout";
 import { useAuth } from "../AuthContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineEdit } from "react-icons/ai";
 import { BsInfoCircle } from "react-icons/bs";
 import { MdOutlineAddBox, MdOutlineDelete } from "react-icons/md";
 
 const Home = () => {
+	const navigate = useNavigate();
 	const { user } = useAuth();
 	const [loading, setLoading] = useState(false);
 	const [rooms, setRooms] = useState([]); //to update rooms
@@ -22,12 +23,23 @@ const Home = () => {
 			.then((res) => {
 				setRooms(res.data.data); //updates to list all rooms
 				setLoading(false); //no longer loading
+				if (user === null) {
+					navigate("/");
+				}
 			})
 			.catch((err) => {
 				console.log(err);
 				setLoading(false);
 			});
 	}, []);
+
+	function editDelPermissions(room) {
+		if (room.owner === user) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 	//note: Links are from App.jsx Routes
 	return (
@@ -79,14 +91,23 @@ const Home = () => {
 										<Link to={`/rooms/enter/${room._id}`}>
 											<BsInfoCircle className="text-2xl text-green-800" />
 										</Link>
-										{/* TODO: only let the user who is the owner delete */}
-										<Link to={`/rooms/edit/${room._id}`}>
-											<AiOutlineEdit className="text-2xl text-yellow-600" />
-										</Link>
 
-										<Link to={`/rooms/delete/${room._id}`}>
-											<MdOutlineDelete className="text-2xl text-red-600" />
-										</Link>
+										{/*only let the user who is the owner delete */}
+										{editDelPermissions(room) && (
+											<>
+												<Link
+													to={`/rooms/edit/${room._id}`}
+												>
+													<AiOutlineEdit className="text-2xl text-yellow-600" />
+												</Link>
+
+												<Link
+													to={`/rooms/delete/${room._id}`}
+												>
+													<MdOutlineDelete className="text-2xl text-red-600" />
+												</Link>
+											</>
+										)}
 									</div>
 								</td>
 							</tr>
