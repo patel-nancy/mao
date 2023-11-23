@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import mongoose from "mongoose";
 
 const userSchema = mongoose.Schema({
@@ -20,8 +21,8 @@ const userSchema = mongoose.Schema({
 		type: Number,
 	},
 
-	curr_room: {
-		type: String,
+	curr_room_id: {
+		type: ObjectId,
 	},
 });
 

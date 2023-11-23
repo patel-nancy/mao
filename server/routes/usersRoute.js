@@ -1,5 +1,3 @@
-//TODO: change to res.status.json/send -> res.json({success: X, message: Y})
-
 import express from "express";
 import { User } from "../models/userModel.js";
 import bcrypt from "bcrypt";
@@ -30,6 +28,13 @@ router.post("/login", async (req, res) => {
 		if (!isValidPassword) {
 			return res.json({ success: false, message: "Invalid password." });
 		}
+
+		//set user's curr_room_id to Main's id whenever they log in
+		await User.updateOne(
+			{ _id: user._id },
+			{ $set: { curr_room_id: "655e9fd84c9886c72113403d" } }
+		);
+
 		return res.status(200).json({
 			success: true,
 			username: req.body.username,
@@ -73,7 +78,7 @@ router.post("/register", async (req, res) => {
 			hashed_password: hashed_password,
 			wins: 0,
 			losses: 0,
-			curr_room: "Main",
+			curr_room_id: "655e9fd84c9886c72113403d", //Main room ID
 		};
 
 		const user = await User.create(newUser); //userModel.js
@@ -99,13 +104,12 @@ router.get("/", async (req, res) => {
 	}
 });
 
-//TODO: rooms are currently room NAMES, not ID
 //get users in SPECIFIC room
-router.get("/:room", async (req, res) => {
+router.get("/:roomid", async (req, res) => {
 	try {
 		//TODO: make sure room exists
-		const { room } = req.params; //in the route, :room is a parameter
-		const users = await User.find({ curr_room: room });
+		const { roomid } = req.params; //in the route, :room is a parameter
+		const users = await User.find({ curr_room_id: roomid });
 		return res.status(200).json(users);
 	} catch (err) {
 		console.log(err.message);
@@ -113,33 +117,34 @@ router.get("/:room", async (req, res) => {
 	}
 });
 
-//TODO: may not need this...delete?
-//update user's curr_room
-router.put("/curr_room/:userid", async (req, res) => {
+//update user's curr_room_id
+router.put("/curr_room/:username", async (req, res) => {
 	try {
-		const { userid } = req.params;
+		const { username } = req.params;
 		//determining which room to go to
 		let next_room;
-		if (!req.body.room) {
+		if (!req.body.room_id) {
 			//go to Main
-			next_room = "Main";
+			next_room = "655e9fd84c9886c72113403d";
 		} else {
-			next_room = req.body.room;
+			next_room = req.body.room_id;
 		}
-		const result = await User.findByIdAndUpdate(userid, {
-			curr_room: next_room,
-		});
+		const result = await User.updateOne(
+			{ username: username },
+			{ $set: { curr_room_id: next_room } }
+		);
 		if (!result) {
-			return res
-				.status(404)
-				.json({ message: "User not found. Cannot update room." });
+			return res.json({
+				success: false,
+				message: "User not found. Cannot update room.",
+			});
 		}
 		return res
 			.status(200)
-			.send({ message: "Successful: user room updated." });
+			.json({ success: true, message: "Successful: user room updated." });
 	} catch (err) {
 		console.log(err.message);
-		res.status(500).send({ message: err.message });
+		res.status(500).json({ success: false, message: err.message });
 	}
 });
 

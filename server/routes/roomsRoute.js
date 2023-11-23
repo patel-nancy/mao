@@ -2,7 +2,6 @@ import express from "express";
 import { User } from "../models/userModel.js";
 import { Room } from "../models/roomModel.js";
 
-const app = express();
 const router = express.Router();
 const maxPlayers = 5;
 
@@ -30,12 +29,13 @@ router.get("/:roomid", async (req, res) => {
 });
 
 //creating new room
-router.post("/", async (req, res) => {
+router.post("/create", async (req, res) => {
 	try {
 		if (!req.body.room_name || !req.body.owner) {
-			return res
-				.status(400)
-				.send({ message: "Missing info: room name or owner" });
+			return res.json({
+				success: false,
+				message: "Missing info: room name or owner",
+			});
 		}
 		let newRoom;
 		if (req.body.room_password) {
@@ -55,11 +55,16 @@ router.post("/", async (req, res) => {
 			};
 		}
 		const room = await Room.create(newRoom);
-		//TODO: put owner in new room
-		return res.status(200).json(room);
+		//NOTE: owner is put in new room on CLIENT side (makes a call to a users route)
+
+		return res.status(200).json({
+			success: true,
+			room_id: room._id,
+			message: "Room Created",
+		});
 	} catch (err) {
 		console.log(err.message);
-		res.status(500).send({ message: err.message });
+		res.json({ success: false, message: err.message });
 	}
 });
 
@@ -67,8 +72,7 @@ router.post("/", async (req, res) => {
 router.delete("/:roomid", async (req, res) => {
 	try {
 		const { roomid } = req.params;
-		//TODO: for each player in the room, kick them out to main
-
+		//for each player in the room, kick them out to main
 		//getting all players in room
 		const room = await Room.findById(roomid);
 		if (!room) {
@@ -93,7 +97,7 @@ router.delete("/:roomid", async (req, res) => {
 			//change user's curr_room to Main
 			try {
 				let user_result = await User.findByIdAndUpdate(user_id, {
-					curr_room: "Main",
+					curr_room_id: "655e9fd84c9886c72113403d", //Main room ID
 				});
 				if (!user_result) {
 					return res.status(404).json({

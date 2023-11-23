@@ -21,7 +21,9 @@ const Home = () => {
 		axios
 			.get("http://localhost:5000/rooms/")
 			.then((res) => {
-				setRooms(res.data.data); //updates to list all rooms
+				setRooms(
+					res.data.data.filter((room) => room.room_name !== "Main")
+				); //updates to list all rooms (except Main)
 				setLoading(false); //no longer loading
 				if (user === null) {
 					navigate("/");
