@@ -104,6 +104,24 @@ router.get("/", async (req, res) => {
 	}
 });
 
+//SPECIFIC user info from database
+router.get("/user_data/:user", async (req, res) => {
+	try {
+		const { user } = req.params;
+		const user_data = await User.findOne({ username: user });
+		if (!user_data) {
+			return res.json({
+				success: false,
+				message: "Could not find user.",
+			});
+		}
+		return res.status(200).json({ success: true, user_data: user_data });
+	} catch (err) {
+		console.log(err.message);
+		res.status(500).send({ message: err.message });
+	}
+});
+
 //get users in SPECIFIC room
 router.get("/:roomid", async (req, res) => {
 	try {

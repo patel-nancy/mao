@@ -1,16 +1,64 @@
 import React, { useEffect, useState } from "react";
+import { useAuth } from "../AuthContext";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import BackBtn from "../components/BackBtn";
 import Spinner from "../components/Spinner";
 
 const enterRoom = () => {
+	const navigate = useNavigate();
+	const { user } = useAuth();
+
 	const [room, setRoom] = useState({});
 	const [loading, setLoading] = useState(false);
-	const { id } = useParams();
+	const { id } = useParams(); //from the APP route parameters: /rooms/enter/:id (NOTE: it has to be the same variable name as what's used in the Route)
 
 	useEffect(() => {
 		setLoading(true);
+
+		//update room's players list
+		axios
+			.put(
+				`http://localhost:5000/rooms/adduser/${id}`,
+				{ newplayer: user },
+				{ headers: { "Content-Type": "application/json" } }
+			)
+			.then((res) => {
+				if (res.data.success) {
+					//update player's curr_room_id to entered room
+					axios
+						.put(
+							`http://localhost:5000/users/curr_room/${user}`,
+							{ room_id: id },
+							{ headers: { "Content-Type": "application/json" } }
+						)
+						.then((res2) => {
+							if (res2.data.success) {
+								console.log(
+									"Success. Room's player list and user's curr_room_id updated."
+								);
+							} else {
+								console.log(res2.data.message);
+							}
+						})
+						.catch((err2) => {
+							console.log(
+								"An internal server error occured. Could not update player's curr_room_id"
+							);
+						});
+				} else {
+					//could not add player to room
+					console.log(res.data.message);
+					navigate("/home");
+				}
+			})
+			.catch((err) => {
+				console.log(
+					"An internal server error occured. Could not update room's player list"
+				);
+			});
+
+		//get room info
 		axios
 			.get(`http://localhost:5000/rooms/${id}`)
 			.then((res) => {

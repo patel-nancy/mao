@@ -126,27 +126,32 @@ router.delete("/:roomid", async (req, res) => {
 router.put("/adduser/:roomid", async (req, res) => {
 	try {
 		if (!req.body.newplayer) {
-			return res.status(400).send({ message: "Missing new player name" });
+			return res.json({
+				success: false,
+				message: "Missing new player name",
+			});
 		}
 		const { roomid } = req.params;
 		const room = await Room.findById(roomid);
 		if (!room) {
-			return res.status(404).json({ message: "Room not found." });
+			return res.json({ success: false, message: "Room not found." });
 		}
-		//TODO: put player in new room
+		//NOTE: player's curr_room_id changes on CLIENT side (another put request made to users route)
 		if (room.players.length < maxPlayers) {
 			room.players.push(req.body.newplayer);
 			await room.save();
-			return res
-				.status(200)
-				.send({ message: "Successful: players in room updated." });
+			return res.status(200).json({
+				success: true,
+				message: "Successful: players in room updated.",
+			});
 		}
-		return res
-			.status(404)
-			.json({ message: "Full room. Can't add another player." });
+		return res.json({
+			success: false,
+			message: "Full room. Can't add another player.",
+		});
 	} catch (err) {
 		console.log(err.message);
-		res.status(500).send({ message: err.message });
+		res.json({ success: false, message: err.message });
 	}
 });
 
@@ -154,14 +159,15 @@ router.put("/adduser/:roomid", async (req, res) => {
 router.put("/deleteuser/:roomid", async (req, res) => {
 	try {
 		if (!req.body.playertodelete) {
-			return res
-				.status(400)
-				.send({ message: "Missing player to be deleted" });
+			return res.json({
+				success: false,
+				message: "Missing player to be deleted",
+			});
 		}
 		const { roomid } = req.params;
 		const room = await Room.findById(roomid);
 		if (!room) {
-			return res.status(404).json({ message: "Room not found." });
+			return res.json({ success: false, message: "Room not found." });
 		}
 		for (let i = 0; i < room.players.length; i++) {
 			if (req.body.playertodelete === room.players[i]) {
@@ -171,15 +177,19 @@ router.put("/deleteuser/:roomid", async (req, res) => {
 
 				return res
 					.status(200)
-					.send({ message: "Successful: player removed from room." });
+					.json({
+						success: true,
+						message: "Successful: player removed from room.",
+					});
 			}
 		}
-		return res
-			.status(404)
-			.json({ message: "Could not find player in room's player list." });
+		return res.json({
+			success: false,
+			message: "Could not find player in room's player list.",
+		});
 	} catch (err) {
 		console.log(err.message);
-		return res.status(500).send({ message: err.message });
+		return res.json({ success: false, message: err.message });
 	}
 });
 
