@@ -9,7 +9,8 @@ import Spinner from "../components/Spinner";
 
 const enterRoom = () => {
 	const navigate = useNavigate();
-	const { user } = useAuth();
+	// const { user } = useAuth();
+	const user = localStorage.getItem("username");
 
 	const [room, setRoom] = useState({});
 	const [loading, setLoading] = useState(false);

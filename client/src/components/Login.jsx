@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAuth } from "../AuthContext";
+//import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -10,8 +10,9 @@ const Login = (props) => {
 	const [password, setPassword] = useState("");
 	const [loginError, setLoginError] = useState("");
 
-	const { login } = useAuth();
-	const { user } = useAuth();
+	// const { login } = useAuth();
+	// const { user } = useAuth();
+	let user;
 
 	const handleSubmit = (e) => {
 		e.preventDefault(); //prevents page from reloading and changing states
@@ -22,12 +23,13 @@ const Login = (props) => {
 				{ username: username, password: password }, //POST params
 				{
 					headers: { "Content-Type": "application/json" },
+					credentials: "include",
 				}
 			)
 			.then((res) => {
 				if (res.data.success) {
 					console.log("Login Success.");
-					login(res.data.username);
+					localStorage.setItem("username", res.data.username); //session
 					setLoginError(false);
 					navigate("/home");
 				} else {

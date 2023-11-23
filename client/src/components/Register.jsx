@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useAuth } from "../AuthContext";
+// import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -10,8 +10,8 @@ const Register = (props) => {
 	const [password, setPassword] = useState("");
 	const [loginError, setLoginError] = useState("");
 
-	const { login } = useAuth();
-	const { user } = useAuth();
+	// const { login } = useAuth();
+	// const { user } = useAuth();
 
 	const handleSubmit = (e) => {
 		e.preventDefault(); //prevents page from reloading and changing states
@@ -24,7 +24,7 @@ const Register = (props) => {
 			.then((res) => {
 				if (res.data.success) {
 					console.log("Register Success.");
-					login(res.data.username);
+					localStorage.setItem("username", res.data.username);
 					setLoginError(false);
 					navigate("/home");
 				} else {

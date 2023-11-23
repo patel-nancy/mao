@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Spinner from "../components/Spinner";
 import Logout from "../components/Logout";
-import { useAuth } from "../AuthContext";
+// import { useAuth } from "../AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineEdit } from "react-icons/ai";
 import { BsInfoCircle } from "react-icons/bs";
@@ -10,29 +10,38 @@ import { MdOutlineAddBox, MdOutlineDelete } from "react-icons/md";
 
 const Home = () => {
 	const navigate = useNavigate();
-	const { user } = useAuth();
+	// const { user } = useAuth();
+	const [user, setUser] = useState(null);
 	const [loading, setLoading] = useState(false);
 	const [rooms, setRooms] = useState([]); //to update rooms
 
 	useEffect(() => {
 		setLoading(true);
-
-		//http request to server
-		axios
-			.get("http://localhost:5000/rooms/")
-			.then((res) => {
-				setRooms(
-					res.data.data.filter((room) => room.room_name !== "Main")
-				); //updates to list all rooms (except Main)
-				setLoading(false); //no longer loading
-				if (user === null) {
-					navigate("/");
-				}
-			})
-			.catch((err) => {
-				console.log(err);
-				setLoading(false);
-			});
+		try {
+			const storedUser = localStorage.getItem("username");
+			if (storedUser) {
+				setUser(storedUser);
+				//http request to server
+				axios
+					.get("http://localhost:5000/rooms/")
+					.then((res) => {
+						setRooms(
+							res.data.data.filter(
+								(room) => room.room_name !== "Main"
+							)
+						); //updates to list all rooms (except Main)
+						setLoading(false); //no longer loading
+					})
+					.catch((err) => {
+						console.log(err);
+						setLoading(false);
+					});
+			} else {
+				navigate("/");
+			}
+		} catch (err) {
+			console.error("Error checking session username: ", err);
+		}
 	}, []);
 
 	function editDelPermissions(room) {

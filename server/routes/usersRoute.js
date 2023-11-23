@@ -26,15 +26,23 @@ router.post("/login", async (req, res) => {
 		);
 
 		if (!isValidPassword) {
-			return res.json({ success: false, message: "Invalid password." });
+			return res.json({
+				success: false,
+				message: "Invalid password.",
+			});
 		}
 
 		//set user's curr_room_id to Main's id whenever they log in
-		await User.updateOne(
+		const update = await User.updateOne(
 			{ _id: user._id },
 			{ $set: { curr_room_id: "655e9fd84c9886c72113403d" } }
 		);
-
+		if (!update) {
+			return res.json({
+				success: false,
+				message: "Could not update user's curr_room_id",
+			});
+		}
 		return res.status(200).json({
 			success: true,
 			username: req.body.username,
@@ -82,6 +90,12 @@ router.post("/register", async (req, res) => {
 		};
 
 		const user = await User.create(newUser); //userModel.js
+		if (!user) {
+			return res.json({
+				success: false,
+				message: "Could not create newUser",
+			});
+		}
 		return res.status(201).json({
 			success: true,
 			username: user.username,

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { useAuth } from "../AuthContext";
+// import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import BackBtn from "../components/BackBtn";
 
 const createRoom = () => {
 	const navigate = useNavigate();
-	const { user } = useAuth();
+	// const { user } = useAuth();
+	const user = localStorage.getItem("username");
 
 	const [loading, setLoading] = useState(false);
 	const [roomName, setRoom] = useState("");

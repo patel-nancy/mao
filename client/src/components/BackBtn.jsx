@@ -1,12 +1,13 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { BsArrowLeft } from "react-icons/bs";
-import { useAuth } from "../AuthContext";
+// import { useAuth } from "../AuthContext";
 import axios from "axios";
 
 //default is Home
 const BackBtn = ({ destination = "/home" }) => {
-	const { user } = useAuth();
+	// const { user } = useAuth();
+	const user = localStorage.getItem("username");
 
 	const handleClick = () => {
 		let prev_room_id;
