@@ -93,6 +93,7 @@ router.post("/register", async (req, res) => {
 	}
 });
 
+//TODO: isn't used at all...delete?
 //ALL users from database
 router.get("/", async (req, res) => {
 	try {

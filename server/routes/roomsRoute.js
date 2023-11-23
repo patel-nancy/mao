@@ -1,5 +1,5 @@
 import express from "express";
-import { User } from "../models/userModel.js";
+import axios from "axios";
 import { Room } from "../models/roomModel.js";
 
 const router = express.Router();
@@ -83,33 +83,22 @@ router.delete("/:roomid", async (req, res) => {
 		//find each player by username in DB
 		for (let i = 0; i < players.length; i++) {
 			let username = players[i];
-			let user = await User.findOne({ username: username }); //could make this findOneAndUpdate
-			if (!user) {
-				return res.status(404).json({
-					success: false,
-					message: "User not found by username.",
-				});
-			}
 
-			//get user id
-			let user_id = user._id;
-
-			//change user's curr_room to Main
-			try {
-				let user_result = await User.findByIdAndUpdate(user_id, {
-					curr_room_id: "655e9fd84c9886c72113403d", //Main room ID
+			axios
+				.put(`http://localhost:5000/users/curr_room/${username}`)
+				.then((res) => {
+					if (res.data.success) {
+						console.log("Player moved to main.");
+					} else {
+						return res.json({
+							success: false,
+							message: res.data.message,
+						});
+					}
+				})
+				.catch((err) => {
+					res.json({ success: false, message: err.message });
 				});
-				if (!user_result) {
-					return res.json({
-						success: false,
-						message: "Player not found. Cannot update their room.",
-					});
-				}
-				console.log("Player moved to main");
-			} catch (move_user_err) {
-				console.log(move_user_err.message);
-				res.json({ success: false, message: move_user_err.message });
-			}
 		}
 
 		const result = await Room.findByIdAndDelete(roomid);
@@ -176,7 +165,7 @@ router.put("/deleteuser/:roomid", async (req, res) => {
 			if (req.body.playertodelete === room.players[i]) {
 				room.players.splice(i, 1); //remove the player at that index
 				await room.save();
-				//TODO: move player to main
+				//NOTE: user's curr_room_id must be changed on CLIENT side
 
 				return res.status(200).json({
 					success: true,
