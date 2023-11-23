@@ -6,6 +6,8 @@ import BackBtn from "../components/BackBtn";
 import Spinner from "../components/Spinner";
 
 //TODO: get rid of user from player's list if they close off the tab...ie, don't actually press the back btn
+//TODO: start game when someone clicks btn...then don't let people in
+//NOTE: "list all users in room" will happen during gameplayer where you can see the person you're competing against
 
 const enterRoom = () => {
 	const navigate = useNavigate();

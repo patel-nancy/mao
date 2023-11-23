@@ -4,6 +4,8 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import BackBtn from "../components/BackBtn";
 
+//TODO: add password field to form
+
 const createRoom = () => {
 	const navigate = useNavigate();
 	// const { user } = useAuth();

@@ -2,6 +2,8 @@ import express from "express";
 import axios from "axios";
 import { Room } from "../models/roomModel.js";
 
+//TODO: implement room passwords
+
 const router = express.Router();
 const maxPlayers = 5;
 

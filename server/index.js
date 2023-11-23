@@ -3,6 +3,7 @@ import { PORT, ATLAS_URL } from "./config.js";
 import mongoose from "mongoose";
 import usersRoute from "./routes/usersRoute.js";
 import roomsRoute from "./routes/roomsRoute.js";
+import gamesRoute from "./routes/gamesRoute.js";
 import cors from "cors";
 
 const app = express();
@@ -33,3 +34,6 @@ app.use("/users", usersRoute);
 
 //room functionality
 app.use("/rooms", roomsRoute);
+
+//game functionality
+app.use("/games", gamesRoute);

@@ -6,7 +6,6 @@ const roomSchema = mongoose.Schema({
 		required: true,
 	},
 
-	//??? creative portion: room passwords
 	room_password: {
 		type: String,
 	},
