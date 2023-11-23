@@ -44,14 +44,14 @@ router.post("/create", async (req, res) => {
 				room_name: req.body.room_name,
 				owner: req.body.owner,
 				room_password: req.body.room_password,
-				players: [req.body.owner],
+				players: [],
 			};
 		} else {
 			//"open" room
 			newRoom = {
 				room_name: req.body.room_name,
 				owner: req.body.owner,
-				players: [req.body.owner],
+				players: [],
 			};
 		}
 		const room = await Room.create(newRoom);
@@ -76,7 +76,7 @@ router.delete("/:roomid", async (req, res) => {
 		//getting all players in room
 		const room = await Room.findById(roomid);
 		if (!room) {
-			return res.status(404).json({ message: "Room not found" });
+			return res.json({ success: false, message: "Room not found" });
 		}
 		const players = room.players;
 
@@ -100,25 +100,28 @@ router.delete("/:roomid", async (req, res) => {
 					curr_room_id: "655e9fd84c9886c72113403d", //Main room ID
 				});
 				if (!user_result) {
-					return res.status(404).json({
+					return res.json({
+						success: false,
 						message: "Player not found. Cannot update their room.",
 					});
 				}
-				console.log("Player moved to Main room.");
+				console.log("Player moved to main");
 			} catch (move_user_err) {
 				console.log(move_user_err.message);
-				res.status(500).send({ message: move_user_err.message });
+				res.json({ success: false, message: move_user_err.message });
 			}
 		}
 
 		const result = await Room.findByIdAndDelete(roomid);
 		if (!result) {
-			return res.status(404).json({ message: "Room not found" });
+			return res.json({ success: false, message: "Room not found" });
 		}
-		return res.status(200).send({ message: "Success: room deleted" });
+		return res
+			.status(200)
+			.json({ success: true, message: "Success: room deleted" });
 	} catch (err) {
 		console.log(err.message);
-		res.status(500).send({ message: err.message });
+		res.json({ success: false, message: err.message });
 	}
 });
 
@@ -175,12 +178,10 @@ router.put("/deleteuser/:roomid", async (req, res) => {
 				await room.save();
 				//TODO: move player to main
 
-				return res
-					.status(200)
-					.json({
-						success: true,
-						message: "Successful: player removed from room.",
-					});
+				return res.status(200).json({
+					success: true,
+					message: "Successful: player removed from room.",
+				});
 			}
 		}
 		return res.json({

@@ -23,10 +23,6 @@ const BackBtn = ({ destination = "/home" }) => {
 						.put(`http://localhost:5000/users/curr_room/${user}`)
 						.then((res3) => {
 							if (res3.data.success) {
-								console.log(
-									"Success: user's curr_room_id updated."
-								);
-
 								//update the room's player list
 								axios
 									.put(
@@ -42,7 +38,7 @@ const BackBtn = ({ destination = "/home" }) => {
 									.then((res2) => {
 										if (res2.data.success) {
 											console.log(
-												"Success. Room player list updated."
+												"Success. Both user curr_room_id and room player list updated."
 											);
 										} else {
 											console.log(res2.data.message);
@@ -50,12 +46,12 @@ const BackBtn = ({ destination = "/home" }) => {
 									})
 									.catch((err2) =>
 										console.log(
-											"Could not update room's player list. Server error."
+											"User curr_room_id updated, but could not update room's player list. Server error."
 										)
 									);
 							} else {
 								console.log(
-									"Could not update room's player list. No prev_room_id."
+									"Could not update user's curr_room_id."
 								);
 							}
 						})
@@ -65,6 +61,7 @@ const BackBtn = ({ destination = "/home" }) => {
 							);
 						});
 				} else {
+					console.log("Could not get user's previous room");
 					console.log(res.data.message);
 				}
 			})

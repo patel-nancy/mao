@@ -5,6 +5,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import BackBtn from "../components/BackBtn";
 import Spinner from "../components/Spinner";
 
+//TODO: get rid of user from player's list if they close off the tab...ie, don't actually press the back btn
+
 const enterRoom = () => {
 	const navigate = useNavigate();
 	const { user } = useAuth();
@@ -37,6 +39,17 @@ const enterRoom = () => {
 								console.log(
 									"Success. Room's player list and user's curr_room_id updated."
 								);
+								//get room info
+								axios
+									.get(`http://localhost:5000/rooms/${id}`)
+									.then((res) => {
+										setRoom(res.data);
+										setLoading(false);
+									})
+									.catch((err) => {
+										console.log(err);
+										setLoading(false);
+									});
 							} else {
 								console.log(res2.data.message);
 							}
@@ -56,18 +69,6 @@ const enterRoom = () => {
 				console.log(
 					"An internal server error occured. Could not update room's player list"
 				);
-			});
-
-		//get room info
-		axios
-			.get(`http://localhost:5000/rooms/${id}`)
-			.then((res) => {
-				setRoom(res.data);
-				setLoading(false);
-			})
-			.catch((err) => {
-				console.log(err);
-				setLoading(false);
 			});
 	}, []);
 
