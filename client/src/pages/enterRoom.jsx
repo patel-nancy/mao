@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "../AuthContext";
+//import { useAuth } from "../AuthContext";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import BackBtn from "../components/BackBtn";
@@ -7,7 +7,10 @@ import Spinner from "../components/Spinner";
 
 //TODO: get rid of user from player's list if they close off the tab...ie, don't actually press the back btn
 //TODO: start game when someone clicks btn...then don't let people in
-//NOTE: "list all users in room" will happen during gameplayer where you can see the person you're competing against
+//NOTE: "list all users in room" will happen during gameplay where you can see the person you're competing against
+
+//TODO: implement passwords
+//TODO: refresh the page for EVERYONE when a new player joins
 
 const enterRoom = () => {
 	const navigate = useNavigate();
@@ -16,7 +19,13 @@ const enterRoom = () => {
 
 	const [room, setRoom] = useState({});
 	const [loading, setLoading] = useState(false);
+	const [starting, setStarting] = useState(false);
 	const { id } = useParams(); //from the APP route parameters: /rooms/enter/:id (NOTE: it has to be the same variable name as what's used in the Route)
+
+	function handleStarting(req) {
+		setStarting(req);
+		//TODO: send axios req
+	}
 
 	useEffect(() => {
 		setLoading(true);
@@ -100,6 +109,21 @@ const enterRoom = () => {
 						<span>{room.players}</span>
 					</div>
 				</div>
+			)}
+			{starting ? (
+				<button
+					onClick={(e) => handleStarting(false)}
+					className="text-3xl my-4"
+				>
+					Stop
+				</button>
+			) : (
+				<button
+					onClick={(e) => handleStarting(true)}
+					className="text-3xl my-4"
+				>
+					Start Game
+				</button>
 			)}
 		</div>
 	);

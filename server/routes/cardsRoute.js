@@ -64,6 +64,7 @@ router.post("/draw", async (req, res) => {
 });
 
 //sending cards to piles (each player hand or discard)
+//could be used for: initial hands, drawing cards, playing cards
 router.post("/sendcards", async (req, res) => {
 	try {
 		if (!req.body.deck_id) {
@@ -89,7 +90,7 @@ router.post("/sendcards", async (req, res) => {
 
 		//getting cards
 		const result = await axios.post(
-			"http://localhost:5000/games/draw",
+			"http://localhost:5000/cards/draw",
 			{
 				deck_id: deck_id,
 				draw_count: draw_count,
@@ -144,7 +145,7 @@ router.post("/startgame", async (req, res) => {
 		const room_id = req.body.room_id;
 
 		//creating new deck
-		const newdeck = await axios.get("http://localhost:5000/games/newdeck");
+		const newdeck = await axios.get("http://localhost:5000/cards/newdeck");
 		const deck_id = newdeck.data.deck_id;
 
 		//get player list from room
@@ -158,7 +159,7 @@ router.post("/startgame", async (req, res) => {
 		const draw_count = 7;
 		for (let i = 0; i < players.length; i++) {
 			const result = await axios.post(
-				"http://localhost:5000/games/sendcards",
+				"http://localhost:5000/cards/sendcards",
 				{
 					deck_id: deck_id,
 					playertosend: players[i],

@@ -3,12 +3,38 @@ import { PORT, ATLAS_URL } from "./config.js";
 import mongoose from "mongoose";
 import usersRoute from "./routes/usersRoute.js";
 import roomsRoute from "./routes/roomsRoute.js";
-import gamesRoute from "./routes/gamesRoute.js";
+import cardsRoute from "./routes/cardsRoute.js";
 import cors from "cors";
+import { createServer } from "http";
+import { Server } from "socket.io";
 
 const app = express();
 app.use(express.json()); //for all post reqs, we need this line to parse the req body
 app.use(cors());
+
+//socket
+const server = createServer(app);
+const io = new Server(server, {
+	cors: {
+		origin: "*",
+		methods: ["GET", "POST"],
+	},
+});
+io.on("connection", (socket) => {
+	console.log("User connected");
+
+	socket.on("update", () => {
+		io.emit("reload");
+	});
+
+	socket.on("disconnect", () => {
+		console.log("User disconnected");
+	});
+});
+server.listen(3001, () => {
+	console.log("Server is running on port 3001");
+});
+export { io };
 
 //starting server/client
 app.get("/", (req, res) => {
@@ -36,4 +62,4 @@ app.use("/users", usersRoute);
 app.use("/rooms", roomsRoute);
 
 //game functionality
-app.use("/games", gamesRoute);
+app.use("/games", cardsRoute);

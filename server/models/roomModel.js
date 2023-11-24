@@ -23,6 +23,11 @@ const roomSchema = mongoose.Schema({
 	rules: {
 		type: Array,
 	},
+
+	started: {
+		type: Boolean,
+		required: true,
+	},
 });
 
 export const Room = mongoose.model("Room", roomSchema);

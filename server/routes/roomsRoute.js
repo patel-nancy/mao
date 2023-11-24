@@ -1,6 +1,7 @@
 import express from "express";
 import axios from "axios";
 import { Room } from "../models/roomModel.js";
+import { io } from "../index.js";
 
 //TODO: implement room passwords
 
@@ -18,7 +19,7 @@ router.get("/", async (req, res) => {
 	}
 });
 
-//gets room by id
+//gets room (and its properties) by id
 router.get("/:roomid", async (req, res) => {
 	try {
 		const { roomid } = req.params;
@@ -47,6 +48,7 @@ router.post("/create", async (req, res) => {
 				owner: req.body.owner,
 				room_password: req.body.room_password,
 				players: [],
+				started: false,
 			};
 		} else {
 			//"open" room
@@ -54,11 +56,13 @@ router.post("/create", async (req, res) => {
 				room_name: req.body.room_name,
 				owner: req.body.owner,
 				players: [],
+				started: false,
 			};
 		}
 		const room = await Room.create(newRoom);
 		//NOTE: owner is put in new room on CLIENT side (makes a call to a users route)
 
+		io.emit("reload");
 		return res.status(200).json({
 			success: true,
 			room_id: room._id,
@@ -107,6 +111,8 @@ router.delete("/:roomid", async (req, res) => {
 		if (!result) {
 			return res.json({ success: false, message: "Room not found" });
 		}
+
+		io.emit("reload");
 		return res
 			.status(200)
 			.json({ success: true, message: "Success: room deleted" });
@@ -116,7 +122,7 @@ router.delete("/:roomid", async (req, res) => {
 	}
 });
 
-//adding player to room, IF there's space
+//adding player to room, IF there's space OR game hasn't started
 router.put("/adduser/:roomid", async (req, res) => {
 	try {
 		if (!req.body.newplayer) {
@@ -130,10 +136,48 @@ router.put("/adduser/:roomid", async (req, res) => {
 		if (!room) {
 			return res.json({ success: false, message: "Room not found." });
 		}
+
+		//don't let them in if they didn't put in a password and the room requires one
+		if (room.password) {
+			if (!req.body.password) {
+				return res.json({
+					success: false,
+					message:
+						"This is a password-protected room. Please enter the password",
+				});
+			} else if (req.body.password !== room.password) {
+				return res.json({
+					success: false,
+					message: "Incorrect password.",
+				});
+			}
+		}
+
+		//don't let them in if the game has started
+		if (room.started) {
+			return res.json({
+				success: false,
+				message: "Game has already started.",
+			});
+		}
+
+		//don't add their name if they're already on the player list
+		for (let i = 0; i < room.players.length; i++) {
+			if (room.players[i] === req.body.newplayer) {
+				return res.json({
+					success: true,
+					message: "Player was already in the room list",
+				});
+			}
+		}
+
 		//NOTE: player's curr_room_id changes on CLIENT side (another put request made to users route)
 		if (room.players.length < maxPlayers) {
 			room.players.push(req.body.newplayer);
 			await room.save();
+
+			io.emit("reload");
+
 			return res.status(200).json({
 				success: true,
 				message: "Successful: players in room updated.",
@@ -169,6 +213,8 @@ router.put("/deleteuser/:roomid", async (req, res) => {
 				await room.save();
 				//NOTE: user's curr_room_id must be changed on CLIENT side
 
+				io.emit("reload");
+
 				return res.status(200).json({
 					success: true,
 					message: "Successful: player removed from room.",
@@ -183,6 +229,28 @@ router.put("/deleteuser/:roomid", async (req, res) => {
 		console.log(err.message);
 		return res.json({ success: false, message: err.message });
 	}
+});
+
+//changing started
+router.get("/started/:roomid", async (req, res) => {
+	if (!req.body.shouldstart) {
+		return res.json({ success: false, message: "Missing 'shouldstart'" });
+	}
+
+	const { roomid } = req.params;
+	const result = await Room.findByIdAndUpdate(roomid, {
+		started: req.body.shouldstart,
+	});
+	if (!result) {
+		return res.json({
+			success: false,
+			message: "Could not update 'started' property.",
+		});
+	}
+
+	io.emit("reload");
+
+	return res.json({ success: true });
 });
 
 export default router;
