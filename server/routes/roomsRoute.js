@@ -153,14 +153,6 @@ router.put("/adduser/:roomid", async (req, res) => {
 			}
 		}
 
-		//don't let them in if the game has started
-		if (room.started) {
-			return res.json({
-				success: false,
-				message: "Game has already started.",
-			});
-		}
-
 		//don't add their name if they're already on the player list
 		for (let i = 0; i < room.players.length; i++) {
 			if (room.players[i] === req.body.newplayer) {
@@ -169,6 +161,14 @@ router.put("/adduser/:roomid", async (req, res) => {
 					message: "Player was already in the room list",
 				});
 			}
+		}
+
+		//don't let them in if the game has started
+		if (room.started) {
+			return res.json({
+				success: false,
+				message: "Game has already started.",
+			});
 		}
 
 		//NOTE: player's curr_room_id changes on CLIENT side (another put request made to users route)
@@ -232,7 +232,7 @@ router.put("/deleteuser/:roomid", async (req, res) => {
 });
 
 //changing started
-router.get("/started/:roomid", async (req, res) => {
+router.post("/started/:roomid", async (req, res) => {
 	if (!req.body.shouldstart) {
 		return res.json({ success: false, message: "Missing 'shouldstart'" });
 	}

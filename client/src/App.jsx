@@ -12,12 +12,10 @@ const socket = io("http://localhost:3001");
 const App = () => {
 	useEffect(() => {
 		socket.on("reload", () => {
+			//TODO: we can't reload the whole window or else it disconnects the user from the socket
+			//have to go back and redo all the routes to emit specific messages and reload specific components
 			window.location.reload();
 		});
-
-		return () => {
-			socket.disconnect();
-		};
 	}, []);
 
 	return (

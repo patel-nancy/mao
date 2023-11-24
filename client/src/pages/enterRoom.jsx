@@ -10,7 +10,6 @@ import Spinner from "../components/Spinner";
 //NOTE: "list all users in room" will happen during gameplay where you can see the person you're competing against
 
 //TODO: implement passwords
-//TODO: refresh the page for EVERYONE when a new player joins
 
 const enterRoom = () => {
 	const navigate = useNavigate();
@@ -24,7 +23,24 @@ const enterRoom = () => {
 
 	function handleStarting(req) {
 		setStarting(req);
-		//TODO: send axios req
+		axios
+			.post(
+				`http://localhost:5000/rooms/started/${id}`,
+				{ shouldstart: req },
+				{ headers: { "Content-Type": "application/json" } }
+			)
+			.then((res) => {
+				if (res.data.success && req) {
+					console.log("Game starting...");
+				} else if (res.data.success && !req) {
+					console.log("Game stopping...");
+				} else {
+					console.log(res.data.message);
+				}
+			})
+			.catch((err) => {
+				console.log(err.message);
+			});
 	}
 
 	useEffect(() => {
