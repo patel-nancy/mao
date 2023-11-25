@@ -4,6 +4,7 @@ import { Room } from "../models/roomModel.js";
 import { io } from "../index.js";
 
 //TODO: implement room passwords
+//TODO: sockets
 
 const router = express.Router();
 const maxPlayers = 5;
@@ -156,6 +157,7 @@ router.put("/adduser/:roomid", async (req, res) => {
 		//don't add their name if they're already on the player list
 		for (let i = 0; i < room.players.length; i++) {
 			if (room.players[i] === req.body.newplayer) {
+				io.emit("reload");
 				return res.json({
 					success: true,
 					message: "Player was already in the room list",
@@ -233,7 +235,7 @@ router.put("/deleteuser/:roomid", async (req, res) => {
 
 //changing started
 router.post("/started/:roomid", async (req, res) => {
-	if (!req.body.shouldstart) {
+	if (req.body.shouldstart === null || req.body.shouldstart === undefined) {
 		return res.json({ success: false, message: "Missing 'shouldstart'" });
 	}
 

@@ -4,6 +4,8 @@ import axios from "axios";
 const router = express.Router();
 const deck_count = 1;
 
+//TODO: sockets
+
 //generate new (shuffled) deck for room
 //NOTE: we only use one deck but reshuffle once the draw pile gets low
 router.get("/newdeck", async (req, res) => {

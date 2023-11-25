@@ -5,6 +5,8 @@ import bcrypt from "bcrypt";
 const router = express.Router();
 const saltRounds = 10;
 
+//TODO: sockets
+
 //validating user login
 router.post("/login", async (req, res) => {
 	try {

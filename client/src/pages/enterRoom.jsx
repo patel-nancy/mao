@@ -4,12 +4,16 @@ import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
 import BackBtn from "../components/BackBtn";
 import Spinner from "../components/Spinner";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:3001");
 
 //TODO: get rid of user from player's list if they close off the tab...ie, don't actually press the back btn
 //TODO: start game when someone clicks btn...then don't let people in
 //NOTE: "list all users in room" will happen during gameplay where you can see the person you're competing against
 
 //TODO: implement passwords
+//TODO: SOCKETS MF AGHHHGHAGHDKJG
 
 const enterRoom = () => {
 	const navigate = useNavigate();
@@ -67,17 +71,6 @@ const enterRoom = () => {
 								console.log(
 									"Success. Room's player list and user's curr_room_id updated."
 								);
-								//get room info
-								axios
-									.get(`http://localhost:5000/rooms/${id}`)
-									.then((res) => {
-										setRoom(res.data);
-										setLoading(false);
-									})
-									.catch((err) => {
-										console.log(err);
-										setLoading(false);
-									});
 							} else {
 								console.log(res2.data.message);
 							}
@@ -98,6 +91,22 @@ const enterRoom = () => {
 					"An internal server error occured. Could not update room's player list"
 				);
 			});
+
+		const handleReload = () => {
+			//get room info
+			axios
+				.get(`http://localhost:5000/rooms/${id}`)
+				.then((res) => {
+					setRoom(res.data);
+					setLoading(false);
+				})
+				.catch((err) => {
+					console.log(err);
+					setLoading(false);
+				});
+		};
+
+		socket.on("reload", handleReload);
 	}, []);
 
 	return (
