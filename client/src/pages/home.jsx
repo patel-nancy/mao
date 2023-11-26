@@ -23,7 +23,7 @@ const Home = () => {
 				setUser(storedUser);
 				//http request to server
 				axios
-					.get("http://localhost:5000/rooms/")
+					.get("http://localhost:5555/rooms/")
 					.then((res) => {
 						setRooms(
 							res.data.data.filter(

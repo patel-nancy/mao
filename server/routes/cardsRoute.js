@@ -92,7 +92,7 @@ router.post("/sendcards", async (req, res) => {
 
 		//getting cards
 		const result = await axios.post(
-			"http://localhost:5000/cards/draw",
+			"http://localhost:5555/cards/draw",
 			{
 				deck_id: deck_id,
 				draw_count: draw_count,
@@ -147,11 +147,11 @@ router.post("/startgame", async (req, res) => {
 		const room_id = req.body.room_id;
 
 		//creating new deck
-		const newdeck = await axios.get("http://localhost:5000/cards/newdeck");
+		const newdeck = await axios.get("http://localhost:5555/cards/newdeck");
 		const deck_id = newdeck.data.deck_id;
 
 		//get player list from room
-		const room = await axios.get(`http://localhost:5000/rooms/${room_id}`);
+		const room = await axios.get(`http://localhost:5555/rooms/${room_id}`);
 		if (!room) {
 			return res.json({ success: false, message: "Could not find room" });
 		}
@@ -161,7 +161,7 @@ router.post("/startgame", async (req, res) => {
 		const draw_count = 7;
 		for (let i = 0; i < players.length; i++) {
 			const result = await axios.post(
-				"http://localhost:5000/cards/sendcards",
+				"http://localhost:5555/cards/sendcards",
 				{
 					deck_id: deck_id,
 					playertosend: players[i],

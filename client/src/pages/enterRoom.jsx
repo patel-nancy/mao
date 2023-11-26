@@ -6,7 +6,7 @@ import BackBtn from "../components/BackBtn";
 import Spinner from "../components/Spinner";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:5000");
+const socket = io("http://localhost:5555");
 
 //TODO: get rid of user from player's list if they close off the tab...ie, don't actually press the back btn
 //TODO: start game when someone clicks btn...then don't let people in
@@ -31,7 +31,7 @@ const enterRoom = () => {
 		setStarting(req);
 		axios
 			.post(
-				`http://localhost:5000/rooms/started/${id}`,
+				`http://localhost:5555/rooms/started/${id}`,
 				{ shouldstart: req },
 				{ headers: { "Content-Type": "application/json" } }
 			)
@@ -42,7 +42,7 @@ const enterRoom = () => {
 					//TODO: make this faster? bc cards aren't being set
 					axios
 						.post(
-							"http://localhost:5000/cards/startgame",
+							"http://localhost:5555/cards/startgame",
 							{ room_id: id },
 							{ headers: { "Content-Type": "application/json" } }
 						)
@@ -71,7 +71,7 @@ const enterRoom = () => {
 		//update room's players list
 		axios
 			.put(
-				`http://localhost:5000/rooms/adduser/${id}`,
+				`http://localhost:5555/rooms/adduser/${id}`,
 				{ newplayer: user },
 				{ headers: { "Content-Type": "application/json" } }
 			)
@@ -80,7 +80,7 @@ const enterRoom = () => {
 					//update player's curr_room_id to entered room
 					axios
 						.put(
-							`http://localhost:5000/users/curr_room/${user}`,
+							`http://localhost:5555/users/curr_room/${user}`,
 							{ room_id: id },
 							{ headers: { "Content-Type": "application/json" } }
 						)
@@ -113,7 +113,7 @@ const enterRoom = () => {
 		const handleReload = () => {
 			//get room info
 			axios
-				.get(`http://localhost:5000/rooms/${id}`)
+				.get(`http://localhost:5555/rooms/${id}`)
 				.then((res) => {
 					setRoom(res.data);
 					setLoading(false);
@@ -129,7 +129,7 @@ const enterRoom = () => {
 		//TODO: get deck_id
 		axios
 			.post(
-				"http://localhost:5000/cards/whosecards",
+				"http://localhost:5555/cards/whosecards",
 				{ deck_id: deck_id, username: user },
 				{ headers: { "Content-Type": "application/json" } }
 			)

@@ -10,7 +10,7 @@ const deleteRoom = () => {
 	useEffect(() => {
 		setLoading(true);
 		axios
-			.delete(`http://localhost:5000/rooms/${id}`)
+			.delete(`http://localhost:5555/rooms/${id}`)
 			.then((res) => {
 				setLoading(false);
 				if (res.data.success) {

@@ -92,7 +92,7 @@ router.delete("/:roomid", async (req, res) => {
 			let username = players[i];
 
 			axios
-				.put(`http://localhost:5000/users/curr_room/${username}`)
+				.put(`http://localhost:5555/users/curr_room/${username}`)
 				.then((res) => {
 					if (res.data.success) {
 						console.log("Player moved to main.");

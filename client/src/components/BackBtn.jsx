@@ -14,20 +14,20 @@ const BackBtn = ({ destination = "/home" }) => {
 		//find what the previous room's id
 		//so we can delete player from player list later
 		axios
-			.get(`http://localhost:5000/users/user_data/${user}`)
+			.get(`http://localhost:5555/users/user_data/${user}`)
 			.then((res) => {
 				if (res.data.success) {
 					prev_room_id = res.data.user_data.curr_room_id;
 
 					//update user's curr_room_id
 					axios
-						.put(`http://localhost:5000/users/curr_room/${user}`)
+						.put(`http://localhost:5555/users/curr_room/${user}`)
 						.then((res3) => {
 							if (res3.data.success) {
 								//update the room's player list
 								axios
 									.put(
-										`http://localhost:5000/rooms/deleteuser/${prev_room_id}`,
+										`http://localhost:5555/rooms/deleteuser/${prev_room_id}`,
 										{ playertodelete: user },
 										{
 											headers: {

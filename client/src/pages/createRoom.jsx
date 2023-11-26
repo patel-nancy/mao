@@ -27,7 +27,7 @@ const createRoom = () => {
 		e.preventDefault();
 		axios
 			.post(
-				"http://localhost:5000/rooms/create",
+				"http://localhost:5555/rooms/create",
 				{ room_name: roomName, owner: user },
 				{ headers: { "Content-Type": "application/json" } }
 			)
@@ -36,7 +36,7 @@ const createRoom = () => {
 					//change user's curr_room_id to new room
 					axios
 						.put(
-							`http://localhost:5000/users/curr_room/${user}`,
+							`http://localhost:5555/users/curr_room/${user}`,
 							{ room_id: res.data.room_id },
 							{ headers: { "Content-Type": "application/json" } }
 						)

@@ -17,7 +17,7 @@ const Register = (props) => {
 		e.preventDefault(); //prevents page from reloading and changing states
 		axios
 			.post(
-				"http://localhost:5000/users/register",
+				"http://localhost:5555/users/register",
 				{ username: username, password: password },
 				{ headers: { "Content-Type": "application/json" } }
 			)
