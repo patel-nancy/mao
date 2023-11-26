@@ -31,9 +31,6 @@ io.on("connection", (socket) => {
 		console.log("User disconnected");
 	});
 });
-server.listen(3001, () => {
-	console.log("Server is running on port 3001");
-});
 export { io };
 
 //starting server/client
@@ -47,7 +44,8 @@ mongoose
 	.connect(ATLAS_URL)
 	.then(() => {
 		console.log("Connected to Database.");
-		app.listen(PORT, () => {
+		//instead of app.listen, use server so we can use socket
+		server.listen(PORT, () => {
 			console.log(`Port: ${PORT}`);
 		});
 	})
@@ -62,4 +60,4 @@ app.use("/users", usersRoute);
 app.use("/rooms", roomsRoute);
 
 //game functionality
-app.use("/games", cardsRoute);
+app.use("/cards", cardsRoute);

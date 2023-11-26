@@ -188,4 +188,37 @@ router.post("/startgame", async (req, res) => {
 	}
 });
 
+//get specific card pile
+router.post("/whosecards", async (req, res) => {
+	try {
+		if (!req.body.deck_id || !req.body.username) {
+			return res.json({
+				success: false,
+				message: "Missing either deck_id or username",
+			});
+		}
+
+		const deck_id = req.body.deck_id;
+		const pile_name = req.body.username;
+
+		const list_pile = await axios.get(
+			`https://deckofcardsapi.com/api/deck/${deck_id}/pile/${pile_name}/list/`
+		);
+		if (!list_pile) {
+			return res.json({
+				success: false,
+				message: "Could not find that pile",
+			});
+		}
+		return res.json({
+			success: true,
+			remaining: list_pile.data.piles[pile_name].remaining,
+			cards: list_pile.data.piles[pile_name].cards,
+		});
+	} catch (err) {
+		console.log(err.message);
+		return res.json({ success: false, message: err.message });
+	}
+});
+
 export default router;

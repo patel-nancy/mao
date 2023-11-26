@@ -6,7 +6,7 @@ import BackBtn from "../components/BackBtn";
 import Spinner from "../components/Spinner";
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3001");
+const socket = io("http://localhost:5000");
 
 //TODO: get rid of user from player's list if they close off the tab...ie, don't actually press the back btn
 //TODO: start game when someone clicks btn...then don't let people in
@@ -21,6 +21,8 @@ const enterRoom = () => {
 	const user = localStorage.getItem("username");
 
 	const [room, setRoom] = useState({});
+	const [cards, setCards] = useState([]);
+	const [deck_id, setDeckId] = useState();
 	const [loading, setLoading] = useState(false);
 	const [starting, setStarting] = useState(false);
 	const { id } = useParams(); //from the APP route parameters: /rooms/enter/:id (NOTE: it has to be the same variable name as what's used in the Route)
@@ -36,6 +38,22 @@ const enterRoom = () => {
 			.then((res) => {
 				if (res.data.success && req) {
 					console.log("Game starting...");
+
+					//TODO: make this faster? bc cards aren't being set
+					axios
+						.post(
+							"http://localhost:5000/cards/startgame",
+							{ room_id: id },
+							{ headers: { "Content-Type": "application/json" } }
+						)
+						.then((res) => {
+							if (res.data.success) {
+								setDeckId(res.data.deck_id);
+							} else {
+								console.log(res.data.message);
+							}
+						})
+						.catch((err) => console.log(err.message));
 				} else if (res.data.success && !req) {
 					console.log("Game stopping...");
 				} else {
@@ -107,6 +125,22 @@ const enterRoom = () => {
 		};
 
 		socket.on("reload", handleReload);
+
+		//TODO: get deck_id
+		axios
+			.post(
+				"http://localhost:5000/cards/whosecards",
+				{ deck_id: deck_id, username: user },
+				{ headers: { "Content-Type": "application/json" } }
+			)
+			.then((res) => {
+				if (res.data.success) {
+					setCards(res.data.cards);
+				}
+			})
+			.catch((err) => {
+				console.log("An internal server error occured.");
+			});
 	}, []);
 
 	return (
@@ -136,12 +170,19 @@ const enterRoom = () => {
 				</div>
 			)}
 			{starting ? (
-				<button
-					onClick={(e) => handleStarting(false)}
-					className="text-3xl my-4"
-				>
-					Stop
-				</button>
+				<div>
+					<button
+						onClick={(e) => handleStarting(false)}
+						className="text-3xl my-4"
+					>
+						Stop
+					</button>
+					<div className="flex flex-row w-20">
+						{cards.map((card) => (
+							<img src={card.image} alt="" />
+						))}
+					</div>
+				</div>
 			) : (
 				<button
 					onClick={(e) => handleStarting(true)}
