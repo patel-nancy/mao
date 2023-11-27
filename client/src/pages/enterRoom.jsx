@@ -14,64 +14,25 @@ import { socket } from "../socket";
 //TODO: SOCKETS MF AGHHHGHAGHDKJG
 
 const enterRoom = () => {
-	if (!socket) {
-		console.log("no socket");
-	} else {
-		console.log(socket);
-	}
 	const navigate = useNavigate();
 	// const { user } = useAuth();
 	const user = localStorage.getItem("username");
-
-	const [room, setRoom] = useState({});
-	const [cards, setCards] = useState([]);
-	const [deck_id, setDeckId] = useState();
-	const [loading, setLoading] = useState(false);
-	const [starting, setStarting] = useState(false);
-	const { id } = useParams(); //from the APP route parameters: /rooms/enter/:id (NOTE: it has to be the same variable name as what's used in the Route)
-
-	function handleStarting(req) {
-		setStarting(req);
-		axios
-			.post(
-				`http://localhost:5555/rooms/started/${id}`,
-				{ shouldstart: req },
-				{ headers: { "Content-Type": "application/json" } }
-			)
-			.then((res) => {
-				if (res.data.success && req) {
-					console.log("Game starting...");
-
-					//TODO: make this faster? bc cards aren't being set
-					axios
-						.post(
-							"http://localhost:5555/cards/startgame",
-							{ room_id: id },
-							{ headers: { "Content-Type": "application/json" } }
-						)
-						.then((res) => {
-							if (res.data.success) {
-								setDeckId(res.data.deck_id);
-							} else {
-								console.log(res.data.message);
-							}
-						})
-						.catch((err) => console.log(err.message));
-				} else if (res.data.success && !req) {
-					console.log("Game stopping...");
-				} else {
-					console.log(res.data.message);
-				}
-			})
-			.catch((err) => {
-				console.log(err.message);
-			});
+	//session user
+	if (!user) {
+		navigate("/");
 	}
 
-	useEffect(() => {
-		setLoading(true);
+	const [room, setRoom] = useState({});
+	const { id } = useParams(); //from the APP route parameters: /rooms/enter/:id (NOTE: it has to be the same variable name as what's used in the Route)
 
-		//update room's players list
+	const [starting, setStarting] = useState(false);
+	const [cards, setCards] = useState([]);
+	const [deck_id, setDeckId] = useState();
+
+	const [loading, setLoading] = useState(false);
+
+	useEffect(() => {
+		//update room's players list (CHECKS: password, room.started)
 		axios
 			.put(
 				`http://localhost:5555/rooms/adduser/${id}`,
@@ -92,6 +53,16 @@ const enterRoom = () => {
 								console.log(
 									"Success. Room's player list and user's curr_room_id updated."
 								);
+
+								//socket join room
+								socket.emit("join-room", { room_id: id });
+
+								//send to all other players new player list
+								socket.emit("update-player-list", {
+									room_id: id,
+								});
+
+								fetchRoomByID();
 							} else {
 								console.log(res2.data.message);
 							}
@@ -113,38 +84,92 @@ const enterRoom = () => {
 				);
 			});
 
-		const handleReload = () => {
-			//get room info
+		//updating player list
+		socket.on("updating-player-list", () => {
+			fetchRoomByID();
+		});
+	}, []);
+
+	const fetchRoomByID = async () => {
+		//getting room again
+		try {
 			axios
 				.get(`http://localhost:5555/rooms/${id}`)
 				.then((res) => {
 					setRoom(res.data);
-					setLoading(false);
 				})
 				.catch((err) => {
 					console.log(err);
-					setLoading(false);
+					// setLoading(false);
 				});
-		};
+		} catch (err) {
+			console.error("Error fetching room: ", err.message);
+		}
+	};
 
-		// socket.on("reload", handleReload);
-
-		//TODO: get deck_id
+	function handleStarting(req) {
+		setStarting(req);
 		axios
 			.post(
-				"http://localhost:5555/cards/whosecards",
-				{ deck_id: deck_id, username: user },
+				`http://localhost:5555/rooms/started/${id}`,
+				{ shouldstart: req },
 				{ headers: { "Content-Type": "application/json" } }
 			)
 			.then((res) => {
-				if (res.data.success) {
-					setCards(res.data.cards);
+				if (res.data.success && req) {
+					console.log("Game starting...");
+					createGame();
+				} else if (res.data.success && !req) {
+					console.log("Game stopping...");
+				} else {
+					console.log(res.data.message);
 				}
 			})
 			.catch((err) => {
-				console.log("An internal server error occured.");
+				console.log(err.message);
 			});
-	}, []);
+	}
+
+	const createGame = async () => {
+		try {
+			if (setStarting) {
+				axios
+					.post(
+						"http://localhost:5555/cards/startgame",
+						{ room_id: id },
+						{ headers: { "Content-Type": "application/json" } }
+					)
+					.then((res) => {
+						if (res.data.success) {
+							setDeckId(res.data.deck_id);
+							console.log("New deck id!");
+						} else {
+							console.log(res.data.message);
+						}
+					})
+					.catch((err) => console.log(err.message));
+			}
+		} catch (err) {
+			console.error("Error creating came: ", err.message);
+		}
+	};
+
+	// 	//TODO: get deck_id
+	// 	axios
+	// 		.post(
+	// 			"http://localhost:5555/cards/whosecards",
+	// 			{ deck_id: deck_id, username: user },
+	// 			{ headers: { "Content-Type": "application/json" } }
+	// 		)
+	// 		.then((res) => {
+	// 			if (res.data.success) {
+	// 				setCards(res.data.cards);
+	// 			}
+	// 		})
+	// 		.catch((err) => {
+	// 			console.log("An internal server error occured.");
+	// 		});
+	// }, []);
 
 	return (
 		<div className="p-4">

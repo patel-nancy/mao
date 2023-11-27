@@ -14,11 +14,14 @@ export default class RoomController extends BaseController {
 		io.to("655e9fd84c9886c72113403d").emit("update-main-room-list");
 	};
 
-	room_created = () => {
-		io.to("655e9fd84c9886c72113403d").emit("update-main-room-list");
+	join_room = ({ room_id }) => {
+		// console.log(room_id);
+		this.socket.join(room_id);
+		console.log("socket has joined room");
 	};
 
-	room_deleted = () => {
-		io.to("655e9fd84c9886c72113403d").emit("update-main-room-list");
+	update_player_list = ({ room_id }) => {
+		io.to(room_id).emit("updating-player-list");
+		console.log("updating...");
 	};
 }
