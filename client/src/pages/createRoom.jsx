@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import BackBtn from "../components/BackBtn";
+import { socket } from "../socket";
 
 //TODO: add password field to form
 
@@ -10,10 +11,9 @@ const createRoom = () => {
 	const navigate = useNavigate();
 	// const { user } = useAuth();
 	const user = localStorage.getItem("username");
-
 	const [loading, setLoading] = useState(false);
-	const [roomName, setRoom] = useState("");
 
+	//only create room if user exists
 	useEffect(() => {
 		setLoading(true);
 		if (user === null) {
@@ -22,6 +22,9 @@ const createRoom = () => {
 		}
 		setLoading(false);
 	}, []);
+
+	//input roomName from form
+	const [roomName, setRoom] = useState("");
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -45,6 +48,8 @@ const createRoom = () => {
 								console.log(
 									"Success: user's curr_room_id updated."
 								);
+								socket.emit("rooms-updated"); //updates main/home room list for everyone in main
+
 								//navigate to new room
 								navigate(`/rooms/enter/${res.data.room_id}`);
 							} else {

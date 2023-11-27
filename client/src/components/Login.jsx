@@ -31,8 +31,7 @@ const Login = (props) => {
 				if (res.data.success) {
 					console.log("Login Success.");
 					localStorage.setItem("username", res.data.username); //session
-					socket.connect();
-					socket.emit("logged-in");
+					socket.emit("logged-in"); //tesing
 					setLoginError(false);
 					navigate("/home");
 				} else {

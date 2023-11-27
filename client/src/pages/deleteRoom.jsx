@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { socket } from "../socket";
 
 const deleteRoom = () => {
 	const navigate = useNavigate();
@@ -15,6 +16,7 @@ const deleteRoom = () => {
 				setLoading(false);
 				if (res.data.success) {
 					console.log(res.data.message);
+					socket.emit("rooms-updated"); //updates main/home room list for everyone in main
 					navigate("/home");
 				} else {
 					console.log(res.data.message);

@@ -14,6 +14,8 @@ const Register = (props) => {
 	// const { login } = useAuth();
 	// const { user } = useAuth();
 
+	let user;
+
 	const handleSubmit = (e) => {
 		e.preventDefault(); //prevents page from reloading and changing states
 		axios
@@ -26,8 +28,7 @@ const Register = (props) => {
 				if (res.data.success) {
 					console.log("Register Success.");
 					localStorage.setItem("username", res.data.username);
-					socket.connect();
-					socket.emit("logged-in");
+					socket.emit("logged-in"); //testing
 					setLoginError(false);
 					navigate("/home");
 				} else {

@@ -7,8 +7,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineEdit } from "react-icons/ai";
 import { BsInfoCircle } from "react-icons/bs";
 import { MdOutlineAddBox, MdOutlineDelete } from "react-icons/md";
+import { socket } from "../socket";
 
 const Home = () => {
+	//console.log(socket.connected);
 	const navigate = useNavigate();
 	// const { user } = useAuth();
 	const [user, setUser] = useState(null);
@@ -17,32 +19,45 @@ const Home = () => {
 
 	useEffect(() => {
 		setLoading(true);
-		try {
-			const storedUser = localStorage.getItem("username");
-			if (storedUser) {
-				setUser(storedUser);
-				//http request to server
-				axios
-					.get("http://localhost:5555/rooms/")
-					.then((res) => {
-						setRooms(
-							res.data.data.filter(
-								(room) => room.room_name !== "Main"
-							)
-						); //updates to list all rooms (except Main)
-						setLoading(false); //no longer loading
-					})
-					.catch((err) => {
-						console.log(err);
-						setLoading(false);
-					});
-			} else {
-				navigate("/");
-			}
-		} catch (err) {
-			console.error("Error checking session username: ", err);
+
+		//session username
+		const storedUser = localStorage.getItem("username");
+		if (storedUser) {
+			setUser(storedUser);
+			socket.emit("logged-in");
+		} else {
+			navigate("/");
 		}
+
+		//room data from server
+		fetchRooms();
+
+		//update when room created/deleted
+		socket.on("update-main-room-list", () => {
+			fetchRooms();
+		});
 	}, []);
+
+	const fetchRooms = async () => {
+		try {
+			axios
+				.get("http://localhost:5555/rooms/")
+				.then((res) => {
+					setRooms(
+						res.data.data.filter(
+							(room) => room.room_name !== "Main"
+						)
+					); //updates to list all rooms (except Main)
+					setLoading(false); //no longer loading
+				})
+				.catch((err) => {
+					console.log(err);
+					setLoading(false);
+				});
+		} catch (err) {
+			console.error("Error fetching room data: ", err.message);
+		}
+	};
 
 	function editDelPermissions(room) {
 		if (room.owner === user) {
