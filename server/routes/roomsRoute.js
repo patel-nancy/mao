@@ -63,7 +63,7 @@ router.post("/create", async (req, res) => {
 		const room = await Room.create(newRoom);
 		//NOTE: owner is put in new room on CLIENT side (makes a call to a users route)
 
-		io.emit("reload");
+		//io.emit("reload");
 		return res.status(200).json({
 			success: true,
 			room_id: room._id,
@@ -113,7 +113,7 @@ router.delete("/:roomid", async (req, res) => {
 			return res.json({ success: false, message: "Room not found" });
 		}
 
-		io.emit("reload");
+		// io.emit("reload");
 		return res
 			.status(200)
 			.json({ success: true, message: "Success: room deleted" });
@@ -157,7 +157,7 @@ router.put("/adduser/:roomid", async (req, res) => {
 		//don't add their name if they're already on the player list
 		for (let i = 0; i < room.players.length; i++) {
 			if (room.players[i] === req.body.newplayer) {
-				io.emit("reload");
+				// io.emit("reload");
 				return res.json({
 					success: true,
 					message: "Player was already in the room list",
@@ -178,7 +178,7 @@ router.put("/adduser/:roomid", async (req, res) => {
 			room.players.push(req.body.newplayer);
 			await room.save();
 
-			io.emit("reload");
+			// io.emit("reload");
 
 			return res.status(200).json({
 				success: true,
@@ -215,7 +215,7 @@ router.put("/deleteuser/:roomid", async (req, res) => {
 				await room.save();
 				//NOTE: user's curr_room_id must be changed on CLIENT side
 
-				io.emit("reload");
+				// io.emit("reload");
 
 				return res.status(200).json({
 					success: true,
@@ -250,7 +250,7 @@ router.post("/started/:roomid", async (req, res) => {
 		});
 	}
 
-	io.emit("reload");
+	// io.emit("reload");
 
 	return res.json({ success: true });
 });

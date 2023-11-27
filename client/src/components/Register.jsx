@@ -2,6 +2,7 @@ import React, { useState } from "react";
 // import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { socket } from "../socket";
 
 const Register = (props) => {
 	const navigate = useNavigate();
@@ -25,6 +26,8 @@ const Register = (props) => {
 				if (res.data.success) {
 					console.log("Register Success.");
 					localStorage.setItem("username", res.data.username);
+					socket.connect();
+					socket.emit("logged-in");
 					setLoginError(false);
 					navigate("/home");
 				} else {

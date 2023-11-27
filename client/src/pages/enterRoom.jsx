@@ -1,12 +1,10 @@
 import React, { useEffect, useState } from "react";
 //import { useAuth } from "../AuthContext";
 import axios from "axios";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useOutletContext } from "react-router-dom";
 import BackBtn from "../components/BackBtn";
 import Spinner from "../components/Spinner";
-import { io } from "socket.io-client";
-
-const socket = io("http://localhost:5555");
+import { socket } from "../socket";
 
 //TODO: get rid of user from player's list if they close off the tab...ie, don't actually press the back btn
 //TODO: start game when someone clicks btn...then don't let people in
@@ -16,6 +14,11 @@ const socket = io("http://localhost:5555");
 //TODO: SOCKETS MF AGHHHGHAGHDKJG
 
 const enterRoom = () => {
+	if (!socket) {
+		console.log("no socket");
+	} else {
+		console.log(socket);
+	}
 	const navigate = useNavigate();
 	// const { user } = useAuth();
 	const user = localStorage.getItem("username");
@@ -124,7 +127,7 @@ const enterRoom = () => {
 				});
 		};
 
-		socket.on("reload", handleReload);
+		// socket.on("reload", handleReload);
 
 		//TODO: get deck_id
 		axios

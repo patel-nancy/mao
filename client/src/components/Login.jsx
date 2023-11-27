@@ -2,6 +2,7 @@ import React, { useState } from "react";
 //import { useAuth } from "../AuthContext";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { socket } from "../socket";
 
 const Login = (props) => {
 	const navigate = useNavigate();
@@ -30,6 +31,8 @@ const Login = (props) => {
 				if (res.data.success) {
 					console.log("Login Success.");
 					localStorage.setItem("username", res.data.username); //session
+					socket.connect();
+					socket.emit("logged-in");
 					setLoginError(false);
 					navigate("/home");
 				} else {

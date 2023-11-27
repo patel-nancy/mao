@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Routes, Route, Outlet } from "react-router-dom";
 import Landing from "./pages/landing";
 import Home from "./pages/home";
 import CreateRoom from "./pages/createRoom";
 import EnterRoom from "./pages/enterRoom";
 import DeleteRoom from "./pages/deleteRoom";
+import { socket } from "./socket";
 
 const App = () => {
 	return (

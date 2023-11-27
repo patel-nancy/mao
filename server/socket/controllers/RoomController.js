@@ -1,0 +1,9 @@
+import BaseController from "./BaseController.js";
+export default class RoomController extends BaseController {
+	// joinRoom = ({ roomId }) => {
+	// 	this.socket.join(roomId);
+	// };
+	logged_in = () => {
+		console.log("logged in mf");
+	};
+}
