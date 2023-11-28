@@ -22,6 +22,11 @@ export default class RoomController extends BaseController {
 
 	update_player_list = ({ room_id }) => {
 		io.to(room_id).emit("updating-player-list");
-		console.log("updating...");
+		console.log("updating player list");
+	};
+
+	update_cards = ({ room_id, deck_id }) => {
+		io.to(room_id).emit("updating-cards", { deck_id: deck_id });
+		console.log(deck_id);
 	};
 }

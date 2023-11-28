@@ -11,7 +11,7 @@ import { socket } from "../socket";
 //NOTE: "list all users in room" will happen during gameplay where you can see the person you're competing against
 
 //TODO: implement passwords
-//TODO: SOCKETS MF AGHHHGHAGHDKJG
+//TODO: set Start based on room.started
 
 const enterRoom = () => {
 	const navigate = useNavigate();
@@ -88,6 +88,13 @@ const enterRoom = () => {
 		socket.on("updating-player-list", () => {
 			fetchRoomByID();
 		});
+
+		//updating to show your cards
+		socket.on("updating-cards", ({ deck_id }) => {
+			console.log(deck_id);
+			console.log("fucking hell");
+			yourCards(deck_id);
+		});
 	}, []);
 
 	const fetchRoomByID = async () => {
@@ -107,8 +114,11 @@ const enterRoom = () => {
 		}
 	};
 
-	function handleStarting(req) {
+	const handleStarting = async (req) => {
+		//useState makes this render super slowly (to the point where starting is not registered as = req), so I made it a variable
 		setStarting(req);
+		console.log("Req", req, "starting", starting);
+
 		axios
 			.post(
 				`http://localhost:5555/rooms/started/${id}`,
@@ -121,6 +131,8 @@ const enterRoom = () => {
 					createGame();
 				} else if (res.data.success && !req) {
 					console.log("Game stopping...");
+					setCards([]);
+					setDeckId();
 				} else {
 					console.log(res.data.message);
 				}
@@ -128,48 +140,52 @@ const enterRoom = () => {
 			.catch((err) => {
 				console.log(err.message);
 			});
-	}
-
-	const createGame = async () => {
-		try {
-			if (setStarting) {
-				axios
-					.post(
-						"http://localhost:5555/cards/startgame",
-						{ room_id: id },
-						{ headers: { "Content-Type": "application/json" } }
-					)
-					.then((res) => {
-						if (res.data.success) {
-							setDeckId(res.data.deck_id);
-							console.log("New deck id!");
-						} else {
-							console.log(res.data.message);
-						}
-					})
-					.catch((err) => console.log(err.message));
-			}
-		} catch (err) {
-			console.error("Error creating came: ", err.message);
-		}
 	};
 
-	// 	//TODO: get deck_id
-	// 	axios
-	// 		.post(
-	// 			"http://localhost:5555/cards/whosecards",
-	// 			{ deck_id: deck_id, username: user },
-	// 			{ headers: { "Content-Type": "application/json" } }
-	// 		)
-	// 		.then((res) => {
-	// 			if (res.data.success) {
-	// 				setCards(res.data.cards);
-	// 			}
-	// 		})
-	// 		.catch((err) => {
-	// 			console.log("An internal server error occured.");
-	// 		});
-	// }, []);
+	const createGame = async () => {
+		axios
+			.post(
+				"http://localhost:5555/cards/startgame",
+				{ room_id: id },
+				{ headers: { "Content-Type": "application/json" } }
+			)
+			.then((res) => {
+				if (res.data.success) {
+					setDeckId(res.data.deck_id);
+					console.log("Sent socket to update/show cards");
+					socket.emit("update-cards", {
+						room_id: id,
+						deck_id: res.data.deck_id,
+					});
+				} else {
+					console.log(res.data.message);
+				}
+			})
+			.catch((err) => console.log(err.message));
+	};
+
+	//TODO: this won't fucking work. it says request failed with status code 404 on the server side, but when I try it on postman it works
+	const yourCards = async (req_deck_id) => {
+		console.log(req_deck_id);
+
+		axios
+			.post(
+				"http://localhost:5555/cards/whosecards",
+				{ deck_id: req_deck_id, username: user },
+				{ headers: { "Content-Type": "application/json" } }
+			)
+			.then((res) => {
+				if (res.data.success) {
+					console.log("Getting your cards...");
+					setCards(res.data.cards);
+				} else {
+					console.log(res.data.message);
+				}
+			})
+			.catch((err) => {
+				console.log("An internal server error occured.");
+			});
+	};
 
 	return (
 		<div className="p-4">
@@ -200,7 +216,7 @@ const enterRoom = () => {
 			{starting ? (
 				<div>
 					<button
-						onClick={(e) => handleStarting(false)}
+						onClick={() => handleStarting(false)}
 						className="text-3xl my-4"
 					>
 						Stop
@@ -213,7 +229,7 @@ const enterRoom = () => {
 				</div>
 			) : (
 				<button
-					onClick={(e) => handleStarting(true)}
+					onClick={() => handleStarting(true)}
 					className="text-3xl my-4"
 				>
 					Start Game

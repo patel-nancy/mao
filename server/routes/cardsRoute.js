@@ -191,13 +191,18 @@ router.post("/startgame", async (req, res) => {
 //get specific card pile
 router.post("/whosecards", async (req, res) => {
 	try {
-		if (!req.body.deck_id || !req.body.username) {
+		if (!req.body.deck_id) {
 			return res.json({
 				success: false,
-				message: "Missing either deck_id or username",
+				message: "Missing deck_id ",
 			});
 		}
-
+		if (!req.body.username) {
+			return res.json({
+				success: false,
+				message: "Missing username",
+			});
+		}
 		const deck_id = req.body.deck_id;
 		const pile_name = req.body.username;
 
@@ -217,6 +222,8 @@ router.post("/whosecards", async (req, res) => {
 		});
 	} catch (err) {
 		console.log(err.message);
+		console.log(req.body.deck_id);
+		console.log(req.body.username);
 		return res.json({ success: false, message: err.message });
 	}
 });
