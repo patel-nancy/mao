@@ -11,6 +11,7 @@ const sockets = (socket) => {
 	socket.on("rooms-updated", roomController.rooms_updated);
 
 	socket.on("join-room", roomController.join_room);
+	socket.on("back_to_home", roomController.back_to_home);
 
 	socket.on("update-player-list", roomController.update_player_list);
 	socket.on("update-cards", roomController.update_cards);

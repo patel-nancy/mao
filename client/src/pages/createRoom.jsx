@@ -30,7 +30,7 @@ const createRoom = () => {
 		axios
 			.post(
 				"http://localhost:5555/rooms/create",
-				{ room_name: roomName, owner: user, password: password },
+				{ room_name: roomName, owner: user, room_password: password },
 				{ headers: { "Content-Type": "application/json" } }
 			)
 			.then((res) => {
@@ -47,6 +47,7 @@ const createRoom = () => {
 								console.log(
 									"Success: user's curr_room_id updated."
 								);
+								console.log(password);
 								socket.emit("rooms-updated"); //updates main/home room list for everyone in main
 
 								//navigate to new room

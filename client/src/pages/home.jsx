@@ -24,7 +24,7 @@ const Home = () => {
 		const storedUser = localStorage.getItem("username");
 		if (storedUser) {
 			setUser(storedUser);
-			socket.emit("logged-in");
+			// socket.emit("logged-in");
 		} else {
 			navigate("/");
 		}
@@ -64,6 +64,35 @@ const Home = () => {
 			return true;
 		} else {
 			return false;
+		}
+	}
+
+	function testPassword(id) {
+		try {
+			axios
+				.get(`http://localhost:5555/rooms/${id}`)
+				.then((res) => {
+					const room = res.data;
+					console.log(room);
+
+					if (!room.room_password) {
+						navigate(`/rooms/enter/${room._id}`);
+					} else {
+						const userInput = window.prompt(
+							"This is a locked room. Please enter the password: "
+						);
+						if (userInput === room.room_password) {
+							navigate(`/rooms/enter/${room._id}`);
+						} else {
+							alert("Incorrect password!");
+						}
+					}
+				})
+				.catch((err) => {
+					console.log(err);
+				});
+		} catch (err) {
+			console.error("Error fetching room: ", err.message);
 		}
 	}
 
@@ -114,9 +143,13 @@ const Home = () => {
 								</td>
 								<td className="border border-slate-700 rounded-md text-center">
 									<div className="flex justify-center gap-x-4">
-										<Link to={`/rooms/enter/${room._id}`}>
+										<button
+											onClick={() =>
+												testPassword(room._id)
+											}
+										>
 											<BsInfoCircle className="text-2xl text-green-800" />
-										</Link>
+										</button>
 
 										{/*only let the user who is the owner delete */}
 										{editDelPermissions(room) && (

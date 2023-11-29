@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { BsArrowLeft } from "react-icons/bs";
 // import { useAuth } from "../AuthContext";
 import axios from "axios";
+import { socket } from "../socket";
 
 //TODO: sockets...if someone clicks this button, join their socket to Main room.
 //send an emit to update old player room for players that are still in there.
@@ -44,6 +45,9 @@ const BackBtn = ({ destination = "/home" }) => {
 											console.log(
 												"Success. Both user curr_room_id and room player list updated."
 											);
+											socket.emit("back_to_home", {
+												prev_room_id,
+											});
 										} else {
 											console.log(res2.data.message);
 										}

@@ -20,6 +20,15 @@ export default class RoomController extends BaseController {
 		console.log("socket has joined room");
 	};
 
+	back_to_home = ({ prev_room_id }) => {
+		this.socket.join("655e9fd84c9886c72113403d");
+		console.log(
+			"User socket has gone back to home with prev room id: " +
+				prev_room_id
+		);
+		this.update_player_list({ room_id: prev_room_id });
+	};
+
 	update_player_list = ({ room_id }) => {
 		io.to(room_id).emit("updating-player-list");
 		console.log("updating player list");

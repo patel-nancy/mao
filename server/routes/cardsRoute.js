@@ -45,7 +45,7 @@ router.post("/refillDraw", async (req, res) => {
 				message: "Failed to draw top card from played pile",
 			});
 		}
-		const top_card = top_card_result.cards[0]; //CHECK: dk if this is supposed to 0 or 1
+		const top_card = top_card_result.data.cards[0]; //CHECK: dk if this is supposed to 0 or 1
 		console.log(top_card);
 
 		//send rest of cards in "played" pile back to deck
@@ -104,7 +104,7 @@ router.post("/draw", async (req, res) => {
 		}
 
 		//draw "pile" REMAINING = 0
-		else if (!result.success) {
+		if (!result.data.success) {
 			//refilling draw deck
 			console.log("Refilling draw deck");
 
@@ -174,36 +174,54 @@ router.post("/sendcards", async (req, res) => {
 			pile_name = req.body.playertosend;
 		}
 
-		//how many cards drawn
-		let draw_count;
-		if (req.body.draw_count) {
-			draw_count = req.body.draw_count;
-		} else {
-			draw_count = 1;
-		}
+		let cards;
+		if (!req.body.card_played_code) {
+			//getting cards from DRAW + DECK
+			//could be used for: initial hands, drawing cards
 
-		//getting cards
-		const result = await axios.post(
-			"http://localhost:5555/cards/draw",
-			{
-				deck_id: deck_id,
-				draw_count: draw_count,
-			},
-			{ headers: { "Content-Type": "application/json" } }
-		);
-		if (!result) {
-			return res.json({
-				success: false,
-				message: "Get cards call failed",
-			});
+			//how many cards drawn
+			let draw_count;
+			if (req.body.draw_count) {
+				draw_count = req.body.draw_count;
+			} else {
+				draw_count = 1;
+			}
+
+			const result = await axios.post(
+				"http://localhost:5555/cards/draw",
+				{
+					deck_id: deck_id,
+					draw_count: draw_count,
+				},
+				{ headers: { "Content-Type": "application/json" } }
+			);
+			if (!result) {
+				return res.json({
+					success: false,
+					message: "Get cards call failed",
+				});
+			}
+			cards = result.data.cards;
+		} else {
+			//a card was played. send this SPECIFIC card code to played pile
+			cards = req.body.card_played_code;
 		}
-		const cards = result.data.cards;
 
 		//send cards to pile
 		for (let i = 0; i < cards.length; i++) {
-			const pile_result = await axios.get(
-				`https://deckofcardsapi.com/api/deck/${deck_id}/pile/${pile_name}/add/?cards=${cards[i].code}`
-			);
+			let pile_result;
+			if (typeof cards === "string") {
+				//we have the card code (this card was played)
+				pile_result = await axios.get(
+					`https://deckofcardsapi.com/api/deck/${deck_id}/pile/${pile_name}/add/?cards=${cards}`
+				);
+			} else {
+				//we have an array of cards (these cards are from the deck)
+				pile_result = await axios.get(
+					`https://deckofcardsapi.com/api/deck/${deck_id}/pile/${pile_name}/add/?cards=${cards[i].code}`
+				);
+			}
+
 			if (!pile_result) {
 				return res.json({
 					success: false,
@@ -216,7 +234,8 @@ router.post("/sendcards", async (req, res) => {
 		const list_pile = await axios.get(
 			`https://deckofcardsapi.com/api/deck/${deck_id}/pile/${pile_name}/list/`
 		);
-		console.log(list_pile.data.piles);
+		console.log(list_pile.data);
+		//console.log(list_pile.data.success);
 
 		return res.json({
 			success: true,
@@ -326,7 +345,10 @@ router.post("/whosecards", async (req, res) => {
 			list_pile: list_pile.data.piles,
 			remaining: list_pile.data.piles[pile_name].remaining,
 			cards: list_pile.data.piles[pile_name].cards,
-			top_card: list_pile.data.piles[pile_name].cards[0],
+			top_card:
+				list_pile.data.piles[pile_name].cards[
+					list_pile.data.piles[pile_name].cards.length - 1 //the most recent element is the last element in the pile
+				],
 		});
 	} catch (err) {
 		console.log(err.message);
