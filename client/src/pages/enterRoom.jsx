@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 //import { useAuth } from "../AuthContext";
 import axios from "axios";
-import { useNavigate, useParams, useOutletContext } from "react-router-dom";
+import {
+	useNavigate,
+	useParams,
+	useOutletContext,
+	isRouteErrorResponse,
+} from "react-router-dom";
 import BackBtn from "../components/BackBtn";
 import Spinner from "../components/Spinner";
 import { socket } from "../socket";
@@ -91,8 +96,7 @@ const enterRoom = () => {
 
 		//updating to show your cards
 		socket.on("updating-cards", ({ deck_id }) => {
-			console.log(deck_id);
-			console.log("fucking hell");
+			console.log("From updating-cards socket", deck_id);
 			yourCards(deck_id);
 		});
 	}, []);
@@ -164,9 +168,8 @@ const enterRoom = () => {
 			.catch((err) => console.log(err.message));
 	};
 
-	//TODO: this won't fucking work. it says request failed with status code 404 on the server side, but when I try it on postman it works
 	const yourCards = async (req_deck_id) => {
-		console.log(req_deck_id);
+		console.log("From yourCards: ", req_deck_id);
 
 		axios
 			.post(
@@ -185,6 +188,16 @@ const enterRoom = () => {
 			.catch((err) => {
 				console.log("An internal server error occured.");
 			});
+	};
+
+	const handlePlay = async (card_code) => {
+		//console.log(card_code);
+		console.log("From handlePlay: ", deck_id);
+		// isTurn = await axios.post(
+		// 	"http://localhost:5555/games/isMyTurn",
+		// 	{ deck_id: deck_id, username: user },
+		// 	{ headers: { "Content-Type": "application/json" } }
+		// );
 	};
 
 	return (
@@ -223,7 +236,13 @@ const enterRoom = () => {
 					</button>
 					<div className="flex flex-row w-20">
 						{cards.map((card) => (
-							<img src={card.image} alt="" />
+							<img
+								src={card.image}
+								alt=""
+								key={card.code}
+								onClick={() => handlePlay(card.code)}
+								className="cursor-pointer"
+							/>
 						))}
 					</div>
 				</div>

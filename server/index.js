@@ -4,6 +4,7 @@ import mongoose from "mongoose";
 import usersRoute from "./routes/usersRoute.js";
 import roomsRoute from "./routes/roomsRoute.js";
 import cardsRoute from "./routes/cardsRoute.js";
+import gamesRoute from "./routes/gamesRoute.js";
 import cors from "cors";
 import { createServer } from "http";
 import { Server } from "socket.io";
@@ -50,5 +51,8 @@ app.use("/users", usersRoute);
 //room functionality
 app.use("/rooms", roomsRoute);
 
-//game functionality
+//card functionality
 app.use("/cards", cardsRoute);
+
+//game functionality
+app.use("/games", gamesRoute);

@@ -21,7 +21,9 @@ const roomSchema = mongoose.Schema({
 	},
 
 	rules: {
-		type: Array,
+		reverse: { type: String },
+		skip: { type: String },
+		curr_player_id: { type: Number },
 	},
 
 	started: {

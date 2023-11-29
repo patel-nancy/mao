@@ -4,7 +4,6 @@ import { Room } from "../models/roomModel.js";
 import { io } from "../index.js";
 
 //TODO: implement room passwords
-//TODO: sockets
 
 const router = express.Router();
 const maxPlayers = 5;
@@ -253,6 +252,40 @@ router.post("/started/:roomid", async (req, res) => {
 	// io.emit("reload");
 
 	return res.json({ success: true });
+});
+
+//updating room rules
+router.post("/rules/:roomid", async (req, res) => {
+	try {
+		if (!req.body.reverse) {
+			return res.json({
+				success: false,
+				message: "Missing reverse",
+			});
+		}
+		if (!req.body.skip) {
+			return res.json({ success: false, message: "Missing skip" });
+		}
+
+		const { roomid } = req.params;
+		const result = await Room.findByIdAndUpdate(roomid, {
+			rules: {
+				reverse: req.body.reverse,
+				skip: req.body.skip,
+				curr_player_index: req.body.curr_player_index,
+			},
+		});
+		if (!result) {
+			return res.json({
+				success: false,
+				message: "Could not update 'rules'",
+			});
+		}
+		return res.json({ success: true });
+	} catch (err) {
+		console.log(err.message);
+		return res.json({ success: false, message: err.message });
+	}
 });
 
 export default router;
