@@ -26,7 +26,56 @@ router.get("/newdeck", async (req, res) => {
 	}
 });
 
-//get cards from deck
+//refill draw "pile" (actually just the deck) because it has no cards left
+//so, take all (except the top) cards from "played" pile and send to deck
+router.post("/refillDraw", async (req, res) => {
+	try {
+		if (!req.body.deck_id) {
+			return res.json({ success: false, message: "Missing deck_id" });
+		}
+		const deck_id = req.body.deck_id;
+
+		//hold onto top card of "played" pile
+		const top_card_result = await axios.get(
+			`https://www.deckofcardsapi.com/api/deck/${deck_id}/pile/played/draw/`
+		);
+		if (!top_card_result) {
+			return res.json({
+				success: false,
+				message: "Failed to draw top card from played pile",
+			});
+		}
+		const top_card = top_card_result.cards[0]; //CHECK: dk if this is supposed to 0 or 1
+		console.log(top_card);
+
+		//send rest of cards in "played" pile back to deck
+		const back_to_deck = await axios.get(
+			`https://www.deckofcardsapi.com/api/deck/${deck_id}/pile/played/return/`
+		);
+		if (!back_to_deck || !back_to_deck.success) {
+			return res.json({
+				success: false,
+				message: "Unable to send rest of played cards back to deck",
+			});
+		}
+
+		//add top card back into "played" pile
+		const add_top_back = await axios.get(
+			`https://www.deckofcardsapi.com/api/deck/${deck_id}/pile/played/add/?cards=${top_card.code}`
+		);
+		if (!add_top_back) {
+			return res.json({
+				success: false,
+				message: "Can't to put top card back in played pile.",
+			});
+		}
+	} catch (err) {
+		console.log(err.message);
+		return res.json({ success: false, message: err.message });
+	}
+});
+
+//get + DRAW cards from deck
 //PARAMS: deck ID, draw_count (optional)
 router.post("/draw", async (req, res) => {
 	try {
@@ -48,7 +97,50 @@ router.post("/draw", async (req, res) => {
 			`https://deckofcardsapi.com/api/deck/${deck_id}/draw/?count=${draw_count}`
 		);
 		if (!result) {
-			return res.json({ success: false, message: "API call failed" });
+			return res.json({
+				success: false,
+				message: "Failed API call",
+			});
+		}
+
+		//draw "pile" REMAINING = 0
+		else if (!result.success) {
+			//refilling draw deck
+			console.log("Refilling draw deck");
+
+			const refill_result = await axios.post(
+				"http://localhost:5555/cards/refillDraw",
+				{ deck_id: deck_id },
+				{ headers: { "Content-Type": "application/json" } }
+			);
+			if (!refill_result) {
+				return res.json({
+					success: false,
+					message: "Could not refill draw deck.",
+				});
+			} else if (!refill_result.data.success) {
+				return res.json({
+					success: false,
+					message: refill_result.data.message,
+				});
+			}
+
+			//drawing again
+			//API call
+			const result2 = await axios.get(
+				`https://deckofcardsapi.com/api/deck/${deck_id}/draw/?count=${draw_count}`
+			);
+			if (!result2) {
+				return res.json({
+					success: false,
+					message: "Failed API call",
+				});
+			}
+			return res.json({
+				success: true,
+				remaining: result2.data.remaining,
+				cards: result2.data.cards,
+			});
 		}
 
 		//NOTE: accesing cards
@@ -65,7 +157,7 @@ router.post("/draw", async (req, res) => {
 	}
 });
 
-//sending cards to piles (each player hand or discard)
+//sending cards to piles (each player hand or "played" pile)
 //could be used for: initial hands, drawing cards, playing cards
 router.post("/sendcards", async (req, res) => {
 	try {
@@ -177,6 +269,19 @@ router.post("/startgame", async (req, res) => {
 			}
 		}
 
+		//add a card to "played" pile
+		const result = await axios.post(
+			"http://localhost:5555/cards/sendcards",
+			{ deck_id: deck_id },
+			{ headers: { "Content-Type": "application/json" } }
+		);
+		if (!result) {
+			return res.json({
+				success: false,
+				message: "Could not add a card to `played` pile",
+			});
+		}
+
 		return res.json({
 			success: true,
 			deck_id: deck_id,
@@ -189,6 +294,7 @@ router.post("/startgame", async (req, res) => {
 });
 
 //get specific card pile
+//can also be used to get played pile! username = "played"
 router.post("/whosecards", async (req, res) => {
 	try {
 		if (!req.body.deck_id) {
@@ -220,6 +326,7 @@ router.post("/whosecards", async (req, res) => {
 			list_pile: list_pile.data.piles,
 			remaining: list_pile.data.piles[pile_name].remaining,
 			cards: list_pile.data.piles[pile_name].cards,
+			top_card: list_pile.data.piles[pile_name].cards[0],
 		});
 	} catch (err) {
 		console.log(err.message);
