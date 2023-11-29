@@ -94,6 +94,16 @@ const enterRoom = () => {
 			console.log("From updating-cards socket", deck_id);
 			yourCards(deck_id);
 		});
+
+		//updating to starting/stopping
+		socket.on("game_starting", () => {
+			console.log("Updating start button to stop.");
+			setStarting(true);
+		});
+		socket.on("game_stopping", () => {
+			console.log("Updating stop button to start.");
+			setStarting(false);
+		});
 	}, []);
 
 	const fetchRoomByID = async () => {
@@ -128,11 +138,13 @@ const enterRoom = () => {
 				if (res.data.success && req) {
 					console.log("Game starting...");
 					createGame();
+					socket.emit("game_starting", { room_id: id });
 				} else if (res.data.success && !req) {
 					console.log("Game stopping...");
 					setCards([]);
 					setOtherCards([]);
 					setDeckId();
+					socket.emit("game_stopping", { room_id: id });
 				} else {
 					console.log(res.data.message);
 				}

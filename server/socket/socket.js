@@ -1,7 +1,9 @@
 import RoomController from "./controllers/RoomController.js";
+import GameController from "./controllers/GameController.js";
 
 const sockets = (socket) => {
 	const roomController = new RoomController(socket);
+	const gameController = new GameController(socket);
 
 	socket.on("logged-in", roomController.logged_in);
 
@@ -12,6 +14,9 @@ const sockets = (socket) => {
 
 	socket.on("update-player-list", roomController.update_player_list);
 	socket.on("update-cards", roomController.update_cards);
+
+	socket.on("game_starting", gameController.game_starting);
+	socket.on("game_stopping", gameController.game_stopping);
 
 	socket.on("disconnect", () => {
 		console.log("User disconnected");
