@@ -5,8 +5,6 @@ import axios from "axios";
 import BackBtn from "../components/BackBtn";
 import { socket } from "../socket";
 
-//TODO: add password field to form
-
 const createRoom = () => {
 	const navigate = useNavigate();
 	// const { user } = useAuth();
@@ -23,15 +21,16 @@ const createRoom = () => {
 		setLoading(false);
 	}, []);
 
-	//input roomName from form
+	//input roomName/password from form
 	const [roomName, setRoom] = useState("");
+	const [password, setPassword] = useState(null);
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		axios
 			.post(
 				"http://localhost:5555/rooms/create",
-				{ room_name: roomName, owner: user },
+				{ room_name: roomName, owner: user, password: password },
 				{ headers: { "Content-Type": "application/json" } }
 			)
 			.then((res) => {
@@ -85,6 +84,14 @@ const createRoom = () => {
 					id="roomName"
 					name="roomName"
 					onChange={(e) => setRoom(e.target.value)}
+				/>
+				<input
+					className="border"
+					type="text"
+					placeholder="OPTIONAL: password"
+					id="password"
+					name="password"
+					onChange={(e) => setPassword(e.target.value)}
 				/>
 				<button type="submit">Create</button>
 			</form>

@@ -7,11 +7,10 @@ import Spinner from "../components/Spinner";
 import { socket } from "../socket";
 
 //TODO: get rid of user from player's list if they close off the tab...ie, don't actually press the back btn
-//TODO: start game when someone clicks btn...then don't let people in
 //NOTE: "list all users in room" will happen during gameplay where you can see the person you're competing against
 
 //TODO: implement passwords
-//TODO: set Start based on room.started
+//TODO: set Start based on room.started -- DONE?
 
 const enterRoom = () => {
 	const navigate = useNavigate();

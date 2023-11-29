@@ -4,6 +4,9 @@ import { BsArrowLeft } from "react-icons/bs";
 // import { useAuth } from "../AuthContext";
 import axios from "axios";
 
+//TODO: sockets...if someone clicks this button, join their socket to Main room.
+//send an emit to update old player room for players that are still in there.
+
 //default is Home
 const BackBtn = ({ destination = "/home" }) => {
 	// const { user } = useAuth();
@@ -73,7 +76,6 @@ const BackBtn = ({ destination = "/home" }) => {
 
 	return (
 		<div className="flex" onClick={handleClick}>
-			{/* TODO: the classNames are all copied from the tutorial */}
 			<Link
 				to={destination}
 				className="bg-sky-800 text-whie px-4 py-1 rounded-1g w-fit"

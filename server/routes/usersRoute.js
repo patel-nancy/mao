@@ -142,7 +142,6 @@ router.get("/user_data/:user", async (req, res) => {
 //get users in SPECIFIC room
 router.get("/:roomid", async (req, res) => {
 	try {
-		//TODO: make sure room exists
 		const { roomid } = req.params; //in the route, :room is a parameter
 		const users = await User.find({ curr_room_id: roomid });
 		return res.status(200).json(users);
