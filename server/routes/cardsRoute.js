@@ -217,6 +217,7 @@ router.post("/whosecards", async (req, res) => {
 		}
 		return res.json({
 			success: true,
+			list_pile: list_pile.data.piles,
 			remaining: list_pile.data.piles[pile_name].remaining,
 			cards: list_pile.data.piles[pile_name].cards,
 		});

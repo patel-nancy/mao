@@ -1,12 +1,7 @@
 import React, { useEffect, useState } from "react";
 //import { useAuth } from "../AuthContext";
 import axios from "axios";
-import {
-	useNavigate,
-	useParams,
-	useOutletContext,
-	isRouteErrorResponse,
-} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import BackBtn from "../components/BackBtn";
 import Spinner from "../components/Spinner";
 import { socket } from "../socket";
@@ -32,6 +27,7 @@ const enterRoom = () => {
 
 	const [starting, setStarting] = useState(false);
 	const [cards, setCards] = useState([]);
+	const [otherCards, setOtherCards] = useState({});
 	const [deck_id, setDeckId] = useState();
 
 	const [loading, setLoading] = useState(false);
@@ -136,6 +132,7 @@ const enterRoom = () => {
 				} else if (res.data.success && !req) {
 					console.log("Game stopping...");
 					setCards([]);
+					setOtherCards([]);
 					setDeckId();
 				} else {
 					console.log(res.data.message);
@@ -156,11 +153,29 @@ const enterRoom = () => {
 			.then((res) => {
 				if (res.data.success) {
 					setDeckId(res.data.deck_id);
+
 					console.log("Sent socket to update/show cards");
 					socket.emit("update-cards", {
 						room_id: id,
 						deck_id: res.data.deck_id,
 					});
+
+					//creating rules for the game
+					//should only do something if X goes wrong
+					axios
+						.get(
+							"http://localhost:5555/games/generate_rules",
+							{ room_id: id },
+							{ headers: { "Content-Type": "application/json" } }
+						)
+						.then((res2) => {
+							if (!res2.data.success) {
+								console.log(res.data.message);
+							}
+						})
+						.catch((err) => {
+							console.log(err.message);
+						});
 				} else {
 					console.log(res.data.message);
 				}
@@ -181,6 +196,18 @@ const enterRoom = () => {
 				if (res.data.success) {
 					console.log("Getting your cards...");
 					setCards(res.data.cards);
+
+					//go through each of the other players in res.data.list_pile
+					//get how many cards they have backwards
+					for (let player in res.data.list_pile) {
+						if (player !== user) {
+							//TODO: get this setter to work
+							// setOtherCards([
+							// 	...otherCards,
+							// 	res.data.list_pile[player].remaining,
+							// ]);
+						}
+					}
 				} else {
 					console.log(res.data.message);
 				}
@@ -192,7 +219,7 @@ const enterRoom = () => {
 
 	const handlePlay = async (card_code) => {
 		//console.log(card_code);
-		console.log("From handlePlay: ", deck_id);
+		console.log("From handlePlay: ", card_code);
 		// isTurn = await axios.post(
 		// 	"http://localhost:5555/games/isMyTurn",
 		// 	{ deck_id: deck_id, username: user },
@@ -245,6 +272,16 @@ const enterRoom = () => {
 							/>
 						))}
 					</div>
+					{/* {otherCards.map((count, index1) => (
+						<div key={index1} className="flex flex-row w-20">
+							{Array.from({ length: count }).map((_, index2) => (
+								<img
+									key={index2}
+									src="https://www.deckofcardsapi.com/static/img/back.png"
+								/>
+							))}
+						</div>
+					))} */}
 				</div>
 			) : (
 				<button

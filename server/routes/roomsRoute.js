@@ -255,6 +255,7 @@ router.post("/started/:roomid", async (req, res) => {
 });
 
 //updating room rules
+//NOTE: this is assumed to be a one-time use function (when the game is initially created)
 router.post("/rules/:roomid", async (req, res) => {
 	try {
 		if (!req.body.reverse) {
@@ -266,11 +267,30 @@ router.post("/rules/:roomid", async (req, res) => {
 		if (!req.body.skip) {
 			return res.json({ success: false, message: "Missing skip" });
 		}
+		if (
+			req.body.curr_player_index === null ||
+			req.body.curr_player_index === undefined
+		) {
+			return res.json({
+				success: false,
+				message: "Missing curr_player_index",
+			});
+		}
+		if (
+			req.body.curr_reverse === null ||
+			req.body.curr_reverse === undefined
+		) {
+			return res.json({
+				success: false,
+				message: "Missing curr_reverse",
+			});
+		}
 
 		const { roomid } = req.params;
 		const result = await Room.findByIdAndUpdate(roomid, {
 			rules: {
 				reverse: req.body.reverse,
+				curr_reverse: req.body.curr_reverse, //starts out moving forward
 				skip: req.body.skip,
 				curr_player_index: req.body.curr_player_index,
 			},

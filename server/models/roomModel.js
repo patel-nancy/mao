@@ -22,8 +22,9 @@ const roomSchema = mongoose.Schema({
 
 	rules: {
 		reverse: { type: String },
+		curr_reverse: { type: Boolean }, //if true, move backward (--) through array, else forwards;
 		skip: { type: String },
-		curr_player_id: { type: Number },
+		curr_player_index: { type: Number },
 	},
 
 	started: {
