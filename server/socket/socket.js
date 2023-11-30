@@ -18,6 +18,7 @@ const sockets = (socket) => {
 
 	socket.on("game_starting", gameController.game_starting);
 	socket.on("game_stopping", gameController.game_stopping);
+	socket.on("game_over", gameController.game_over);
 
 	socket.on("disconnect", () => {
 		console.log("User disconnected");

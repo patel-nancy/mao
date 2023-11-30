@@ -59,7 +59,7 @@ router.post("/refillDraw", async (req, res) => {
 			});
 		}
 
-		//TODO: reshuffle deck
+		//reshuffle deck
 		console.log("Reshuffling");
 		const shuffled = await axios.get(
 			`https://www.deckofcardsapi.com/api/deck/${deck_id}/shuffle/?remaining=true`

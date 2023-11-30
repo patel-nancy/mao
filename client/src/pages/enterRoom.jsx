@@ -29,7 +29,7 @@ const enterRoom = () => {
 	const [playedCard, setPlayedCard] = useState([]);
 	const [otherCards, setOtherCards] = useState({});
 	const [deck_id, setDeckId] = useState();
-	const [winner, setWinner] = useState();
+	const [gameOver, setGameOver] = useState(false);
 
 	const [loading, setLoading] = useState(false);
 
@@ -99,13 +99,44 @@ const enterRoom = () => {
 		});
 
 		//updating to starting/stopping
-		socket.on("game_starting", () => {
+		socket.on("game_starting", ({ deck_id }) => {
 			console.log("Updating start button to stop.");
 			setStarting(true);
+			setDeckId(deck_id);
 		});
 		socket.on("game_stopping", () => {
 			console.log("Updating stop button to start.");
 			setStarting(false);
+		});
+		socket.on("game_over", ({ playerWhoWon }) => {
+			setGameOver(true);
+			console.log("Won: ", playerWhoWon);
+
+			let isWin;
+			if (playerWhoWon === user) {
+				isWin = true;
+			} else {
+				isWin = false;
+				console.log("You lost");
+			}
+
+			//update player stats
+			axios
+				.post(
+					"http://localhost:5555/users/updateStats",
+					{ username: user, isWin: true },
+					{ headers: { "Content-Type": "application/json" } }
+				)
+				.then((res) => {
+					if (res.data.success) {
+						console.log("Player win stats updated");
+					} else {
+						console.log(res.data.message);
+					}
+				})
+				.catch((err) => {
+					console.log(err.message);
+				});
 		});
 	}, []);
 
@@ -141,7 +172,7 @@ const enterRoom = () => {
 				if (res.data.success && req) {
 					console.log("Game starting...");
 					createGame();
-					socket.emit("game_starting", { room_id: id });
+					//socket.emit("game_starting", { room_id: id});
 				} else if (res.data.success && !req) {
 					console.log("Game stopping...");
 					setCards([]);
@@ -166,6 +197,10 @@ const enterRoom = () => {
 			)
 			.then((res) => {
 				if (res.data.success) {
+					socket.emit("game_starting", {
+						room_id: id,
+						deck_id: res.data.deck_id,
+					});
 					setDeckId(res.data.deck_id);
 
 					//creating rules for the game
@@ -215,8 +250,12 @@ const enterRoom = () => {
 
 					if (res.data.remaining === 0) {
 						console.log("You win!");
-						setWinner(user);
+
 						//emit a socket to everyone...room_id and user who won
+						socket.emit("game_over", {
+							room_id: id,
+							playerWhoWon: user,
+						});
 					}
 
 					//go through each of the other players in res.data.list_pile
@@ -351,6 +390,10 @@ const enterRoom = () => {
 						yourCards(deck_id);
 
 						//TODO: send a socket to everyone
+						socket.emit("update-cards", {
+							room_id: id,
+							deck_id: deck_id,
+						});
 					} else {
 						//cards were drawn...update user hand
 						yourCards(deck_id);
