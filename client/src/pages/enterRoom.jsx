@@ -26,6 +26,7 @@ const enterRoom = () => {
 
 	const [starting, setStarting] = useState(false);
 	const [cards, setCards] = useState([]);
+	const [playedCard, setPlayedCard] = useState([]);
 	const [otherCards, setOtherCards] = useState({});
 	const [deck_id, setDeckId] = useState();
 
@@ -93,6 +94,7 @@ const enterRoom = () => {
 		socket.on("updating-cards", ({ deck_id }) => {
 			console.log("From updating-cards socket", deck_id);
 			yourCards(deck_id);
+			getPlayedCard(deck_id);
 		});
 
 		//updating to starting/stopping
@@ -165,28 +167,31 @@ const enterRoom = () => {
 				if (res.data.success) {
 					setDeckId(res.data.deck_id);
 
-					console.log("Sent socket to update/show cards");
-					socket.emit("update-cards", {
-						room_id: id,
-						deck_id: res.data.deck_id,
-					});
-
 					//creating rules for the game
 					//should only do something if X goes wrong
 					axios
-						.get(
+						.post(
 							"http://localhost:5555/games/generate_rules",
 							{ room_id: id },
 							{ headers: { "Content-Type": "application/json" } }
 						)
 						.then((res2) => {
-							if (!res2.data.success) {
-								console.log(res.data.message);
+							if (res2.data.success) {
+								console.log("Room rules updated");
+							} else {
+								console.log(res2.data.message);
 							}
 						})
-						.catch((err) => {
-							console.log(err.message);
+						.catch((err2) => {
+							console.log(err2.message);
 						});
+
+					//get your + other cards
+					console.log("Sent socket to update/show cards");
+					socket.emit("update-cards", {
+						room_id: id,
+						deck_id: res.data.deck_id,
+					});
 				} else {
 					console.log(res.data.message);
 				}
@@ -194,9 +199,8 @@ const enterRoom = () => {
 			.catch((err) => console.log(err.message));
 	};
 
+	//maybe we can do yourCards and otherCards together
 	const yourCards = async (req_deck_id) => {
-		console.log("From yourCards: ", req_deck_id);
-
 		axios
 			.post(
 				"http://localhost:5555/cards/whosecards",
@@ -228,14 +232,70 @@ const enterRoom = () => {
 			});
 	};
 
+	const getPlayedCard = async (req_deck_id) => {
+		axios
+			.post(
+				"http://localhost:5555/cards/whosecards",
+				{ deck_id: req_deck_id, username: "played" },
+				{ headers: { "Content-Type": "application/json" } }
+			)
+			.then((res) => {
+				if (res.data.success) {
+					console.log("Getting played card...");
+					console.log(res.data.top_card);
+					setPlayedCard(res.data.top_card);
+				} else {
+					console.log(res.data.message);
+				}
+			})
+			.catch((err) => {
+				console.log("An internal server error occured.");
+			});
+	};
+
+	const handleDraw = async () => {
+		//draw from deck...send to players pile
+	};
+
 	const handlePlay = async (card_code) => {
 		//console.log(card_code);
 		console.log("From handlePlay: ", card_code);
-		// isTurn = await axios.post(
-		// 	"http://localhost:5555/games/isMyTurn",
-		// 	{ deck_id: deck_id, username: user },
-		// 	{ headers: { "Content-Type": "application/json" } }
-		// );
+		console.log(id);
+
+		axios
+			.post(
+				"http://localhost:5555/games/playTurn",
+				{
+					card_code: card_code,
+					deck_id: deck_id,
+					username: user,
+					room_id: id,
+				},
+				{ headers: { "Content-Type": "application/json" } }
+			)
+			.then((res) => {
+				if (!res.data.success) {
+					//failed
+					console.log(res.data.message);
+				} else {
+					//turn succeeded...see if cards were drawn or played
+					if (res.data.isPlayedChanged) {
+						//update playedCard
+						getPlayedCard(deck_id);
+
+						//upodate your hand
+						yourCards(deck_id);
+
+						//TODO: send a socket to everyone
+					} else {
+						//cards were drawn...update user hand
+						yourCards(deck_id);
+					}
+				}
+			})
+			.catch((err) => {
+				console.log(err.message);
+			});
 	};
 
 	return (
@@ -273,6 +333,7 @@ const enterRoom = () => {
 						Stop
 					</button>
 					<div className="flex flex-row w-20">
+						<h1>Your Cards</h1>
 						{cards.map((card) => (
 							<img
 								src={card.image}
@@ -282,6 +343,14 @@ const enterRoom = () => {
 								className="cursor-pointer"
 							/>
 						))}
+					</div>
+					<div className="flex flex-row w-20">
+						<h1>Played Cards</h1>
+						<img
+							src={playedCard.image}
+							alt=""
+							key={playedCard.code}
+						/>
 					</div>
 					{/* {otherCards.map((count, index1) => (
 						<div key={index1} className="flex flex-row w-20">

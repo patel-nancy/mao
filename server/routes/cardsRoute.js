@@ -212,6 +212,7 @@ router.post("/sendcards", async (req, res) => {
 			let pile_result;
 			if (typeof cards === "string") {
 				//we have the card code (this card was played)
+				//trust the process on this one. IDK how it knows to transfer it from pile to pile, it just does
 				pile_result = await axios.get(
 					`https://deckofcardsapi.com/api/deck/${deck_id}/pile/${pile_name}/add/?cards=${cards}`
 				);
@@ -342,12 +343,12 @@ router.post("/whosecards", async (req, res) => {
 		}
 		return res.json({
 			success: true,
-			list_pile: list_pile.data.piles,
+			list_pile: list_pile.data.piles, //gets remaining of other cards
 			remaining: list_pile.data.piles[pile_name].remaining,
-			cards: list_pile.data.piles[pile_name].cards,
+			cards: list_pile.data.piles[pile_name].cards, //your cards
 			top_card:
 				list_pile.data.piles[pile_name].cards[
-					list_pile.data.piles[pile_name].cards.length - 1 //the most recent element is the last element in the pile
+					list_pile.data.piles[pile_name].cards.length - 1 //the most recent card is the last element in the pile
 				],
 		});
 	} catch (err) {
