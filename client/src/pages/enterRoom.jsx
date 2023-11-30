@@ -260,7 +260,7 @@ const enterRoom = () => {
 	const handlePlay = async (card_code) => {
 		//console.log(card_code);
 		console.log("From handlePlay: ", card_code);
-		console.log(id);
+		console.log(deck_id, id);
 
 		axios
 			.post(

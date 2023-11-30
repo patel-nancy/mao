@@ -182,4 +182,48 @@ router.put("/curr_room/:username", async (req, res) => {
 	}
 });
 
+router.post("updateStats", async (req, res) => {
+	try {
+		if (!req.body.username) {
+			return res.json({
+				success: false,
+				message: "Missing player stats",
+			});
+		}
+		if (req.body.isWin === null || req.body.isWin === undefined) {
+			return res.json({ success: false, message: "Missing isWin" });
+		}
+
+		if (req.body.isWin) {
+			//player won
+			const result = await User.updateOne(
+				{ username: req.body.username },
+				{ $inc: { wins: 1 } }
+			);
+			if (!result) {
+				return res.json({
+					success: false,
+					message: "Unable to update user's wins",
+				});
+			}
+			return res.json({ success: true, message: "Updated user's win" });
+		}
+		//player lost
+		const result = await User.updateOne(
+			{ username: req.body.username },
+			{ $inc: { losses: 1 } }
+		);
+		if (!result) {
+			res.json({
+				success: false,
+				message: "Unable to update user's losses",
+			});
+		}
+		return res.json({ success: true, message: "Updated user losses" });
+	} catch (err) {
+		console.log(err.message);
+		return res.json({ success: false, message: err.message });
+	}
+});
+
 export default router;
