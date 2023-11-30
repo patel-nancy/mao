@@ -52,10 +52,22 @@ router.post("/refillDraw", async (req, res) => {
 		const back_to_deck = await axios.get(
 			`https://www.deckofcardsapi.com/api/deck/${deck_id}/pile/played/return/`
 		);
-		if (!back_to_deck || !back_to_deck.success) {
+		if (!back_to_deck || !back_to_deck.data.success) {
 			return res.json({
 				success: false,
 				message: "Unable to send rest of played cards back to deck",
+			});
+		}
+
+		//TODO: reshuffle deck
+		console.log("Reshuffling");
+		const shuffled = await axios.get(
+			`https://www.deckofcardsapi.com/api/deck/${deck_id}/shuffle/?remaining=true`
+		);
+		if (!shuffled || !shuffled.data.success) {
+			return res.json({
+				success: false,
+				message: "Unable to shuffle deck",
 			});
 		}
 

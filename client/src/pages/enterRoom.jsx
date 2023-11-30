@@ -29,6 +29,7 @@ const enterRoom = () => {
 	const [playedCard, setPlayedCard] = useState([]);
 	const [otherCards, setOtherCards] = useState({});
 	const [deck_id, setDeckId] = useState();
+	const [winner, setWinner] = useState();
 
 	const [loading, setLoading] = useState(false);
 
@@ -212,6 +213,12 @@ const enterRoom = () => {
 					console.log("Getting your cards...");
 					setCards(res.data.cards);
 
+					if (res.data.remaining === 0) {
+						console.log("You win!");
+						setWinner(user);
+						//emit a socket to everyone...room_id and user who won
+					}
+
 					//go through each of the other players in res.data.list_pile
 					//get how many cards they have backwards
 					for (let player in res.data.list_pile) {
@@ -254,25 +261,64 @@ const enterRoom = () => {
 	};
 
 	const handleDraw = async () => {
-		console.log(deck_id);
-		//draw from deck...send to players pile
-		axios
-			.post(
-				"http://localhost:5555/cards/sendcards",
-				{ deck_id: deck_id, playertosend: user },
-				{ headers: { "Content-Type": "application/json" } }
-			)
-			.then((res) => {
-				if (res.data.success) {
-					console.log("Drawing card...");
-					yourCards(deck_id);
-				} else {
-					console.log(res.data.message);
-				}
-			})
-			.catch((err) => {
-				console.log(err.message);
-			});
+		//is it your turn? (if not, then you can't draw cards)
+		const result = await axios.post(
+			"http://localhost:5555/games/isMyTurn",
+			{ deck_id: deck_id, username: user, room_id: id },
+			{ headers: { "Content-Type": "application/json" } }
+		);
+		if (!result) {
+			console.log("Unable to check if its your turn");
+		} else {
+			if (result.data.success && result.data.isMyTurn) {
+				//draw from deck...send to players pile
+				axios
+					.post(
+						"http://localhost:5555/cards/sendcards",
+						{ deck_id: deck_id, playertosend: user },
+						{ headers: { "Content-Type": "application/json" } }
+					)
+					.then((res) => {
+						if (res.data.success) {
+							console.log("Drawing card...");
+
+							//update to next players turn
+							axios
+								.post(
+									"http://localhost:5555/games/updateTurn",
+									{ room_id: id, card_code: "LL" },
+									{
+										headers: {
+											"Content-Type": "application/json",
+										},
+									}
+								)
+								.then((res2) => {
+									if (res2.data.success) {
+										console.log("Player index updated");
+									} else {
+										console.log(res2.data.message);
+									}
+								})
+								.catch((err2) => {
+									console.log(err2.message);
+								});
+
+							//update your hand
+							yourCards(deck_id);
+						} else {
+							console.log(res.data.message);
+						}
+					})
+					.catch((err) => {
+						console.log(err.message);
+					});
+			} else if (!result.data.success) {
+				console.log(result.data.message);
+			} else {
+				console.log("It is not your turn. Cannot draw cards");
+			}
+		}
 	};
 
 	const handlePlay = async (card_code) => {
