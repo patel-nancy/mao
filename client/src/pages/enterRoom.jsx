@@ -254,7 +254,25 @@ const enterRoom = () => {
 	};
 
 	const handleDraw = async () => {
+		console.log(deck_id);
 		//draw from deck...send to players pile
+		axios
+			.post(
+				"http://localhost:5555/cards/sendcards",
+				{ deck_id: deck_id, playertosend: user },
+				{ headers: { "Content-Type": "application/json" } }
+			)
+			.then((res) => {
+				if (res.data.success) {
+					console.log("Drawing card...");
+					yourCards(deck_id);
+				} else {
+					console.log(res.data.message);
+				}
+			})
+			.catch((err) => {
+				console.log(err.message);
+			});
 	};
 
 	const handlePlay = async (card_code) => {
@@ -350,6 +368,15 @@ const enterRoom = () => {
 							src={playedCard.image}
 							alt=""
 							key={playedCard.code}
+						/>
+					</div>
+					<div className="flex flex-row w-20">
+						<h1>Draw Pile</h1>
+						<img
+							src="https://www.deckofcardsapi.com/static/img/back.png"
+							alt=""
+							onClick={() => handleDraw()}
+							className="cursor-pointer"
 						/>
 					</div>
 					{/* {otherCards.map((count, index1) => (
