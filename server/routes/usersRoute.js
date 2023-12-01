@@ -182,7 +182,7 @@ router.put("/curr_room/:username", async (req, res) => {
 	}
 });
 
-router.post("updateStats", async (req, res) => {
+router.post("/updatestats", async (req, res) => {
 	try {
 		if (!req.body.username) {
 			return res.json({

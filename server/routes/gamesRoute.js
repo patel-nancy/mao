@@ -12,7 +12,6 @@ router.post("/generate_rules", async (req, res) => {
 
 	//randomly picking reverse/skip cards
 	const options = [
-		"1",
 		"2",
 		"3",
 		"4",
@@ -104,6 +103,14 @@ router.post("/updateTurn", async (req, res) => {
 		if (curr_reverse) {
 			//move backward through array by X steps
 			let step = 1;
+			console.log(
+				"Card: " +
+					req.body.card_code +
+					". Skip: " +
+					skip +
+					" = " +
+					req.body.card_code.includes(skip)
+			);
 			if (req.body.card_code.includes(skip)) {
 				step = 2;
 			}

@@ -30,6 +30,7 @@ const enterRoom = () => {
 	const [otherCards, setOtherCards] = useState({});
 	const [deck_id, setDeckId] = useState();
 	const [gameOver, setGameOver] = useState(false);
+	const [winner, setWinner] = useState();
 
 	const [loading, setLoading] = useState(false);
 
@@ -109,8 +110,13 @@ const enterRoom = () => {
 			setStarting(false);
 		});
 		socket.on("game_over", ({ playerWhoWon }) => {
+			//TODO: make sure stats are only updated once
 			setGameOver(true);
+			setWinner(playerWhoWon);
 			console.log("Won: ", playerWhoWon);
+
+			//set room.started back to false
+			handleStarting(false);
 
 			let isWin;
 			if (playerWhoWon === user) {
@@ -124,7 +130,7 @@ const enterRoom = () => {
 			axios
 				.post(
 					"http://localhost:5555/users/updateStats",
-					{ username: user, isWin: true },
+					{ username: user, isWin: isWin },
 					{ headers: { "Content-Type": "application/json" } }
 				)
 				.then((res) => {
@@ -431,44 +437,50 @@ const enterRoom = () => {
 					</div>
 				</div>
 			)}
-			{starting ? (
+			{gameOver ? (
 				<div>
-					<button
-						onClick={() => handleStarting(false)}
-						className="text-3xl my-4"
-					>
-						Stop
-					</button>
-					<div className="flex flex-row w-20">
-						<h1>Your Cards</h1>
-						{cards.map((card) => (
-							<img
-								src={card.image}
-								alt=""
-								key={card.code}
-								onClick={() => handlePlay(card.code)}
-								className="cursor-pointer"
-							/>
-						))}
-					</div>
-					<div className="flex flex-row w-20">
-						<h1>Played Cards</h1>
-						<img
-							src={playedCard.image}
-							alt=""
-							key={playedCard.code}
-						/>
-					</div>
-					<div className="flex flex-row w-20">
-						<h1>Draw Pile</h1>
-						<img
-							src="https://www.deckofcardsapi.com/static/img/back.png"
-							alt=""
-							onClick={() => handleDraw()}
-							className="cursor-pointer"
-						/>
-					</div>
-					{/* {otherCards.map((count, index1) => (
+					<h1 className="text-3xl my-4">Game Over. {winner} won.</h1>
+				</div>
+			) : (
+				<div>
+					{starting ? (
+						<div>
+							<button
+								onClick={() => handleStarting(false)}
+								className="text-3xl my-4"
+							>
+								Stop
+							</button>
+							<div className="flex flex-row w-20">
+								<h1>Your Cards</h1>
+								{cards.map((card) => (
+									<img
+										src={card.image}
+										alt=""
+										key={card.code}
+										onClick={() => handlePlay(card.code)}
+										className="cursor-pointer"
+									/>
+								))}
+							</div>
+							<div className="flex flex-row w-20">
+								<h1>Played Cards</h1>
+								<img
+									src={playedCard.image}
+									alt=""
+									key={playedCard.code}
+								/>
+							</div>
+							<div className="flex flex-row w-20">
+								<h1>Draw Pile</h1>
+								<img
+									src="https://www.deckofcardsapi.com/static/img/back.png"
+									alt=""
+									onClick={() => handleDraw()}
+									className="cursor-pointer"
+								/>
+							</div>
+							{/* {otherCards.map((count, index1) => (
 						<div key={index1} className="flex flex-row w-20">
 							{Array.from({ length: count }).map((_, index2) => (
 								<img
@@ -478,14 +490,16 @@ const enterRoom = () => {
 							))}
 						</div>
 					))} */}
+						</div>
+					) : (
+						<button
+							onClick={() => handleStarting(true)}
+							className="text-3xl my-4"
+						>
+							Start Game
+						</button>
+					)}
 				</div>
-			) : (
-				<button
-					onClick={() => handleStarting(true)}
-					className="text-3xl my-4"
-				>
-					Start Game
-				</button>
 			)}
 		</div>
 	);
