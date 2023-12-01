@@ -5,6 +5,7 @@ import Logout from "../components/Logout";
 // import { useAuth } from "../AuthContext";
 import { Link, useNavigate } from "react-router-dom";
 import { AiOutlineEdit } from "react-icons/ai";
+import { FaRegUserCircle } from "react-icons/fa";
 import { BsInfoCircle } from "react-icons/bs";
 import { MdOutlineAddBox, MdOutlineDelete } from "react-icons/md";
 import { socket } from "../socket";
@@ -100,7 +101,12 @@ const Home = () => {
 	return (
 		//the div className is a TailwindCSS feature. copied from a tutorial.
 		<div className="p-4">
-			<h1>Welcome, {user ? user : "Guest"}!</h1>
+			<div className="flex gap-x-5 items-center">
+				<Link to={"/userprofile"}>
+					<FaRegUserCircle className="text-sky-800 text-4xl" />
+				</Link>
+				<h1>Welcome, {user ? user : "Guest"}!</h1>
+			</div>
 			<div className="flex justify-between items-center">
 				<h1 className="text-3xl my-8">Rooms List</h1>
 				<Link to={`/rooms/create`}>

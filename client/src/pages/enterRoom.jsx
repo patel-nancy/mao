@@ -111,8 +111,6 @@ const enterRoom = () => {
 		});
 		socket.on("game_over", ({ playerWhoWon }) => {
 			//TODO: make sure stats are only updated once
-			setGameOver(true);
-			setWinner(playerWhoWon);
 			console.log("Won: ", playerWhoWon);
 
 			//set room.started back to false
@@ -143,6 +141,11 @@ const enterRoom = () => {
 				.catch((err) => {
 					console.log(err.message);
 				});
+
+			socket.off("game_over");
+
+			setGameOver(true);
+			setWinner(playerWhoWon);
 		});
 	}, []);
 
@@ -451,28 +454,30 @@ const enterRoom = () => {
 							>
 								Stop
 							</button>
-							<div className="flex flex-row w-20">
-								<h1>Your Cards</h1>
+							<h1>Your Cards</h1>
+							<div className="flex flex-row flex-wrap">
 								{cards.map((card) => (
 									<img
 										src={card.image}
 										alt=""
 										key={card.code}
 										onClick={() => handlePlay(card.code)}
-										className="cursor-pointer"
+										className="cursor-pointer w-20"
 									/>
 								))}
 							</div>
+
+							<h1>Played Cards</h1>
 							<div className="flex flex-row w-20">
-								<h1>Played Cards</h1>
 								<img
 									src={playedCard.image}
 									alt=""
 									key={playedCard.code}
 								/>
 							</div>
+
+							<h1>Draw Pile</h1>
 							<div className="flex flex-row w-20">
-								<h1>Draw Pile</h1>
 								<img
 									src="https://www.deckofcardsapi.com/static/img/back.png"
 									alt=""

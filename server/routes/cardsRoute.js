@@ -281,8 +281,8 @@ router.post("/startgame", async (req, res) => {
 		}
 		const players = room.data.players;
 
-		//go through each player, give them 7 cards
-		const draw_count = 3;
+		//go through each player, give them 4 cards
+		const draw_count = 4;
 		for (let i = 0; i < players.length; i++) {
 			const result = await axios.post(
 				"http://localhost:5555/cards/sendcards",
