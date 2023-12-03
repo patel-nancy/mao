@@ -1,5 +1,7 @@
 import BaseController from "./BaseController.js";
 import { io } from "../../index.js";
+import axios from "axios";
+
 export default class RoomController extends BaseController {
 	// joinRoom = ({ roomId }) => {
 	// 	this.socket.join(roomId);
@@ -37,5 +39,24 @@ export default class RoomController extends BaseController {
 	update_cards = ({ room_id, deck_id }) => {
 		io.to(room_id).emit("updating-cards", { deck_id: deck_id });
 		console.log(deck_id);
+	};
+
+	delete_user_on_disconnect = ({ user, room_id }) => {
+		console.log("deleting " + user + " in " + room_id + " on disconnect");
+		axios
+			.put(
+				`http://localhost:5555/rooms/deleteuser/${room_id}`,
+				{ playertodelete: user },
+				{ headers: { "Content-Type": "application/json" } }
+			)
+			.then((res) => {
+				if (res.data.success) {
+					console.log("successfully deleted user on unload");
+					io.to(room_id).emit("updating-player-list");
+				}
+			})
+			.catch((err) => {
+				console.err(err.message);
+			});
 	};
 }

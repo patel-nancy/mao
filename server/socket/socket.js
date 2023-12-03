@@ -20,6 +20,11 @@ const sockets = (socket) => {
 	socket.on("game_stopping", gameController.game_stopping);
 	socket.on("game_over", gameController.game_over);
 
+	socket.on(
+		"delete_user_on_disconnect",
+		roomController.delete_user_on_disconnect
+	);
+
 	socket.on("disconnect", () => {
 		console.log("User disconnected");
 	});

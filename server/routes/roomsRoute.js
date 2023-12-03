@@ -206,6 +206,7 @@ router.put("/deleteuser/:roomid", async (req, res) => {
 		if (!room) {
 			return res.json({ success: false, message: "Room not found." });
 		}
+		// console.log(room);
 		for (let i = 0; i < room.players.length; i++) {
 			if (req.body.playertodelete === room.players[i]) {
 				room.players.splice(i, 1); //remove the player at that index
