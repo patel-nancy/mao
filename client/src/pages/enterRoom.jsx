@@ -258,7 +258,6 @@ const enterRoom = () => {
           }
 
           let list_pile = res.data.list_pile;
-          console.log('CP MOTHERFUCKER');
           let otherCardsArray = new Array();
           //go through each of the other players in res.data.list_pile
           //get how many cards they have backwards
@@ -349,6 +348,7 @@ const enterRoom = () => {
 
               //update your hand
               yourCards(deck_id);
+              socket.emit('update-cards', { room_id: id, deck_id: deck_id });
             } else {
               console.log(res.data.message);
             }
@@ -393,7 +393,7 @@ const enterRoom = () => {
             //upodate your hand
             yourCards(deck_id);
 
-            //TODO: send a socket to everyone
+            //send a socket to everyone
             socket.emit('update-cards', {
               room_id: id,
               deck_id: deck_id
@@ -401,6 +401,10 @@ const enterRoom = () => {
           } else {
             //cards were drawn...update user hand
             yourCards(deck_id);
+            socket.emit('update-cards', {
+              room_id: id,
+              deck_id: deck_id
+            });
           }
         }
       })
